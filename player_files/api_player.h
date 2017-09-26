@@ -1,7 +1,4 @@
 #pragma once
-#include <iostream>
-#include <vector>
-#include <string>
 
 #define _NULL -1
 #define INT_MAX 1000000000
