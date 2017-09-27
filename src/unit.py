@@ -1,394 +1,223 @@
+from enum import Enum
+
+'''（请允许我加一段中文注释。。。
+为保证基类调用时的安全性 所有属性都设置为了私有 同时为了方便调用 使用了装饰器来提供返回值
+但没有设置 set函数的装饰器，因此属性现在处于能读不能取的状态 在以后确定了哪些变量需要在运行期间重新赋值再加入对应的set的装饰器'''
+
 # ***************************The Define of Global Parameters**************************************
+Inf=9999999
+#**************************************************Enum Value ant Table******************************************
+class UnitType(Enum):
+    Base = 0
 
-Inf = 9999999
+    PRODUCTION_BUILDING = 1
+    DEFENSIVE_BUILDING = 2
+    RESOURCE_BUILDING = 3
 
-BYTE = 1
-CIRCUIT = 2
-CPU = 3
-ALGORITHM = 4
-NETWORK = 5
-AI = 6
+    DATA = 4
+    SUBSTANCE = 5
+    ALL = 6
 
-DATA = 11
-ENTITY = 12
-ALL = 13
+class Age(Enum):
+    BIT = 0
+    CIRCUIT = 1
+    PROCESSOR = 2
+    ALGORITHM = 3
+    NETWORK = 4
+    AI = 5
 
-BYTESTREAM = 21
-USOURCE = 22
-ISOURCE = 23
-ENIAC = 24
-DATAPACKAGE = 25
-OPTICAL = 26
-TURINGMACHINE = 27
-ULTRON = 28
+class BuildingType(Enum):
+    Base=0
 
-ATTACK_TOWER = 31
-GO_STRAIGHT = 32
-DEFENCE_ATTACK = 33
+    Shannon=1
+    Thevenin=2
+    Norton=3
+    Von_Neumann=4
+    Berners_Lee=5
+    Kuen_Kao=6
+    Turing=7
+    Tony_Stark=8
 
+    Bool=9
+    Ohm=10
+    Mole=11
+    Monte_Carlo=12
+    Larry_Roberts=13
+    Robert_Kahn=14
+    Musk=15
+    Hawkin=16
 
-#******************************************************************************
+    Programmer=17
 
-#************************************Basic Class**************************************
+class BuildingAttribute(Enum):
+    BUILDING_TYPE=0
+    ORIGINAL_HP=1
+    ORIGINAL_ATTACK=2
+    ORIGINAL_RANGE=3
+    TRAGET=4
+    AGE=5
+    ORIGINAL_RESOURCE=6
+    ORIGINAL_BUILDING_POINT=7
+    AOE=8
+    CD=9
+
+class SoliderName(Enum):
+    BIT_STREAM=0
+    VOLTAGE_SOURCE=1
+    CURRENT_SOURCE=2
+    ENIAC=3
+    PACKET=4
+    OPTICAL_FIBER=5
+    TURNING_MACHINE=6
+    ULTRON=7
+
+class SoliderAttr(Enum):
+    SOLIDER_TYPE=0
+    ACTION_MODE=1
+    SOLIDER_ORIGINAL_HP=2
+    SOLIDER_ORIGINAL_ATTACK=3
+    ATTACK_RANGE=4
+    SPEED=5
+
+class ActionMode(Enum):
+    BUILDING_ATTACK=0
+    BASE_ATTACK=1
+    MOVING_ATTACK=2
+
+OriginalBuildingAttribute={
+
+BuildingType.Base:{BuildingAttribute.BUILDING_TYPE:UnitType.Base,None:None},    #need to complete
+BuildingType.Shannon:{ BuildingAttribute.BUILDING_TYPE:UnitType.PRODUCTION_BUILDING , BuildingAttribute.ORIGINAL_HP:100 , BuildingAttribute.ORIGINAL_ATTACK:None, BuildingAttribute.ORIGINAL_RANGE:10 ,BuildingAttribute.TRAGET:SoliderName.BIT_STREAM ,BuildingAttribute.AGE:Age.BIT ,BuildingAttribute.ORIGINAL_RESOURCE:100 ,BuildingAttribute.ORIGINAL_BUILDING_POINT:10 ,BuildingAttribute.AOE:None ,BuildingAttribute.CD: 1},
+BuildingType.Thevenin:{ BuildingAttribute.BUILDING_TYPE:UnitType.PRODUCTION_BUILDING , BuildingAttribute.ORIGINAL_HP:120 , BuildingAttribute.ORIGINAL_ATTACK:None, BuildingAttribute.ORIGINAL_RANGE:5 ,BuildingAttribute.TRAGET:SoliderName.VOLTAGE_SOURCE ,BuildingAttribute.AGE:Age.CIRCUIT ,BuildingAttribute.ORIGINAL_RESOURCE:120 ,BuildingAttribute.ORIGINAL_BUILDING_POINT:12 ,BuildingAttribute.AOE:None ,BuildingAttribute.CD: 2},
+BuildingType.Norton:{ BuildingAttribute.BUILDING_TYPE:UnitType.PRODUCTION_BUILDING , BuildingAttribute.ORIGINAL_HP:120 , BuildingAttribute.ORIGINAL_ATTACK:None, BuildingAttribute.ORIGINAL_RANGE:5 ,BuildingAttribute.TRAGET:SoliderName.CURRENT_SOURCE ,BuildingAttribute.AGE:Age.CIRCUIT ,BuildingAttribute.ORIGINAL_RESOURCE:120 ,BuildingAttribute.ORIGINAL_BUILDING_POINT:12 ,BuildingAttribute.AOE:None ,BuildingAttribute.CD: 2},
+BuildingType.Von_Neumann:{ BuildingAttribute.BUILDING_TYPE:UnitType.PRODUCTION_BUILDING , BuildingAttribute.ORIGINAL_HP:150 , BuildingAttribute.ORIGINAL_ATTACK:None, BuildingAttribute.ORIGINAL_RANGE:15 ,BuildingAttribute.TRAGET:SoliderName.ENIAC ,BuildingAttribute.AGE:Age.PROCESSOR ,BuildingAttribute.ORIGINAL_RESOURCE:150 ,BuildingAttribute.ORIGINAL_BUILDING_POINT:16 ,BuildingAttribute.AOE:None ,BuildingAttribute.CD: 5},
+BuildingType.Berners_Lee:{ BuildingAttribute.BUILDING_TYPE:UnitType.PRODUCTION_BUILDING , BuildingAttribute.ORIGINAL_HP:360 , BuildingAttribute.ORIGINAL_ATTACK:None, BuildingAttribute.ORIGINAL_RANGE:30 ,BuildingAttribute.TRAGET:SoliderName.PACKET ,BuildingAttribute.AGE:Age.NETWORK ,BuildingAttribute.ORIGINAL_RESOURCE:360 ,BuildingAttribute.ORIGINAL_BUILDING_POINT:12 ,BuildingAttribute.AOE:None ,BuildingAttribute.CD: 1},
+BuildingType.Kuen_Kao:{ BuildingAttribute.BUILDING_TYPE:UnitType.PRODUCTION_BUILDING , BuildingAttribute.ORIGINAL_HP:300 , BuildingAttribute.ORIGINAL_ATTACK:None, BuildingAttribute.ORIGINAL_RANGE:15 ,BuildingAttribute.TRAGET:SoliderName.OPTICAL_FIBER ,BuildingAttribute.AGE:Age.NETWORK ,BuildingAttribute.ORIGINAL_RESOURCE:300 ,BuildingAttribute.ORIGINAL_BUILDING_POINT:30 ,BuildingAttribute.AOE:None ,BuildingAttribute.CD: 3},
+BuildingType.Turing:{ BuildingAttribute.BUILDING_TYPE:UnitType.PRODUCTION_BUILDING , BuildingAttribute.ORIGINAL_HP:600 , BuildingAttribute.ORIGINAL_ATTACK:None, BuildingAttribute.ORIGINAL_RANGE:15 ,BuildingAttribute.TRAGET:SoliderName.TURNING_MACHINE ,BuildingAttribute.AGE:Age.AI ,BuildingAttribute.ORIGINAL_RESOURCE:600 ,BuildingAttribute.ORIGINAL_BUILDING_POINT:20 ,BuildingAttribute.AOE:None ,BuildingAttribute.CD: 8},
+BuildingType.Tony_Stark:{ BuildingAttribute.BUILDING_TYPE:UnitType.PRODUCTION_BUILDING , BuildingAttribute.ORIGINAL_HP:1000 , BuildingAttribute.ORIGINAL_ATTACK:None, BuildingAttribute.ORIGINAL_RANGE:10 ,BuildingAttribute.TRAGET:SoliderName.TURNING_MACHINE ,BuildingAttribute.AGE:Age.AI ,BuildingAttribute.ORIGINAL_RESOURCE:1000 ,BuildingAttribute.ORIGINAL_BUILDING_POINT:80 ,BuildingAttribute.AOE:None ,BuildingAttribute.CD: 10},
+
+BuildingType.Bool:{ BuildingAttribute.BUILDING_TYPE:UnitType.DEFENSIVE_BUILDING , BuildingAttribute.ORIGINAL_HP:150 , BuildingAttribute.ORIGINAL_ATTACK:16, BuildingAttribute.ORIGINAL_RANGE:20 ,BuildingAttribute.TRAGET:UnitType.DATA ,BuildingAttribute.AGE:Age.BIT ,BuildingAttribute.ORIGINAL_RESOURCE:150 ,BuildingAttribute.ORIGINAL_BUILDING_POINT:15 ,BuildingAttribute.AOE:0 ,BuildingAttribute.CD: 1},
+BuildingType.Ohm:{ BuildingAttribute.BUILDING_TYPE:UnitType.DEFENSIVE_BUILDING , BuildingAttribute.ORIGINAL_HP:180 , BuildingAttribute.ORIGINAL_ATTACK:10, BuildingAttribute.ORIGINAL_RANGE:25 ,BuildingAttribute.TRAGET:UnitType.SUBSTANCE ,BuildingAttribute.AGE:Age.CIRCUIT ,BuildingAttribute.ORIGINAL_RESOURCE:180 ,BuildingAttribute.ORIGINAL_BUILDING_POINT:20 ,BuildingAttribute.AOE:3 ,BuildingAttribute.CD: 3},
+BuildingType.Mole:{ BuildingAttribute.BUILDING_TYPE:UnitType.DEFENSIVE_BUILDING, BuildingAttribute.ORIGINAL_HP:225 , BuildingAttribute.ORIGINAL_ATTACK:4, BuildingAttribute.ORIGINAL_RANGE:35 ,BuildingAttribute.TRAGET:UnitType.DATA ,BuildingAttribute.AGE:Age.PROCESSOR ,BuildingAttribute.ORIGINAL_RESOURCE:225 ,BuildingAttribute.ORIGINAL_BUILDING_POINT:25 ,BuildingAttribute.AOE:0 ,BuildingAttribute.CD: 1},
+BuildingType.Monte_Carlo:{ BuildingAttribute.BUILDING_TYPE:UnitType.DEFENSIVE_BUILDING , BuildingAttribute.ORIGINAL_HP:300 , BuildingAttribute.ORIGINAL_ATTACK:25, BuildingAttribute.ORIGINAL_RANGE:25 ,BuildingAttribute.TRAGET:UnitType.SUBSTANCE ,BuildingAttribute.AGE:Age.ALGORITHM ,BuildingAttribute.ORIGINAL_RESOURCE:300 ,BuildingAttribute.ORIGINAL_BUILDING_POINT:30 ,BuildingAttribute.AOE:0 ,BuildingAttribute.CD: 2},
+BuildingType.Larry_Roberts:{ BuildingAttribute.BUILDING_TYPE:UnitType.DEFENSIVE_BUILDING , BuildingAttribute.ORIGINAL_HP:480 , BuildingAttribute.ORIGINAL_ATTACK:5, BuildingAttribute.ORIGINAL_RANGE:25 ,BuildingAttribute.TRAGET:UnitType.ALL ,BuildingAttribute.AGE:Age.NETWORK ,BuildingAttribute.ORIGINAL_RESOURCE:480 ,BuildingAttribute.ORIGINAL_BUILDING_POINT:50 ,BuildingAttribute.AOE:2 ,BuildingAttribute.CD: 1},
+BuildingType.Robert_Kahn:{ BuildingAttribute.BUILDING_TYPE:UnitType.DEFENSIVE_BUILDING , BuildingAttribute.ORIGINAL_HP:450 , BuildingAttribute.ORIGINAL_ATTACK:None , BuildingAttribute.ORIGINAL_RANGE:30 ,BuildingAttribute.TRAGET:UnitType.DATA ,BuildingAttribute.AGE:Age.NETWORK ,BuildingAttribute.ORIGINAL_RESOURCE:450 ,BuildingAttribute.ORIGINAL_BUILDING_POINT:45 ,BuildingAttribute.AOE:0 ,BuildingAttribute.CD: 1},
+BuildingType.Musk:{ BuildingAttribute.BUILDING_TYPE:UnitType.DEFENSIVE_BUILDING, BuildingAttribute.ORIGINAL_HP:900 , BuildingAttribute.ORIGINAL_ATTACK:0, BuildingAttribute.ORIGINAL_RANGE:10 ,BuildingAttribute.TRAGET:UnitType.ALL ,BuildingAttribute.AGE:Age.AI ,BuildingAttribute.ORIGINAL_RESOURCE:900 ,BuildingAttribute.ORIGINAL_BUILDING_POINT:90 ,BuildingAttribute.AOE:0 ,BuildingAttribute.CD: 1},
+BuildingType.Hawkin:{ BuildingAttribute.BUILDING_TYPE:UnitType.DEFENSIVE_BUILDING , BuildingAttribute.ORIGINAL_HP:1500 , BuildingAttribute.ORIGINAL_ATTACK:Inf, BuildingAttribute.ORIGINAL_RANGE:10 ,BuildingAttribute.TRAGET:UnitType.ALL ,BuildingAttribute.AGE:Age.AI ,BuildingAttribute.ORIGINAL_RESOURCE:1500 ,BuildingAttribute.ORIGINAL_BUILDING_POINT:100 ,BuildingAttribute.AOE:1 ,BuildingAttribute.CD: 5},
+
+BuildingType.Programmer:{ BuildingAttribute.BUILDING_TYPE:UnitType.DEFENSIVE_BUILDING , BuildingAttribute.ORIGINAL_HP:100 , BuildingAttribute.ORIGINAL_ATTACK:50},  #use attack stand for the ability of resource building to get resource
+}
+
+OriginalSoliderAttribute={
+    SoliderName.BIT_STREAM:{SoliderAttr.SOLIDER_TYPE:UnitType.DATA ,SoliderAttr.ACTION_MODE:ActionMode.BUILDING_ATTACK ,SoliderAttr.SOLIDER_ORIGINAL_HP:10 ,SoliderAttr.SOLIDER_ORIGINAL_ATTACK:10 ,SoliderAttr.ATTACK_RANGE:8 ,SoliderAttr.SPEED:8 },
+    SoliderName.VOLTAGE_SOURCE:{SoliderAttr.SOLIDER_TYPE: UnitType.SUBSTANCE, SoliderAttr.ACTION_MODE: ActionMode.BUILDING_ATTACK, SoliderAttr.SOLIDER_ORIGINAL_HP: 30,SoliderAttr.SOLIDER_ORIGINAL_ATTACK: 16, SoliderAttr.ATTACK_RANGE: 12,SoliderAttr.SPEED: 6},
+    SoliderName.CURRENT_SOURCE:{SoliderAttr.SOLIDER_TYPE: UnitType.SUBSTANCE, SoliderAttr.ACTION_MODE: ActionMode.BASE_ATTACK, SoliderAttr.SOLIDER_ORIGINAL_HP: 30, SoliderAttr.SOLIDER_ORIGINAL_ATTACK: 160, SoliderAttr.ATTACK_RANGE: 1,SoliderAttr.SPEED: 6},
+    SoliderName.ENIAC: {SoliderAttr.SOLIDER_TYPE: UnitType.SUBSTANCE,SoliderAttr.ACTION_MODE: ActionMode.MOVING_ATTACK, SoliderAttr.SOLIDER_ORIGINAL_HP: 200,SoliderAttr.SOLIDER_ORIGINAL_ATTACK: 15, SoliderAttr.ATTACK_RANGE: 5,SoliderAttr.SPEED: 3},
+    SoliderName.PACKET: {SoliderAttr.SOLIDER_TYPE: UnitType.DATA,SoliderAttr.ACTION_MODE: ActionMode.BASE_ATTACK, SoliderAttr.SOLIDER_ORIGINAL_HP: 30,SoliderAttr.SOLIDER_ORIGINAL_ATTACK: 200, SoliderAttr.ATTACK_RANGE: 1, SoliderAttr.SPEED: 16},
+    SoliderName.OPTICAL_FIBER: {SoliderAttr.SOLIDER_TYPE: UnitType.SUBSTANCE,SoliderAttr.ACTION_MODE: ActionMode.BUILDING_ATTACK, SoliderAttr.SOLIDER_ORIGINAL_HP: 40,SoliderAttr.SOLIDER_ORIGINAL_ATTACK: 15, SoliderAttr.ATTACK_RANGE:30, SoliderAttr.SPEED: 10},
+    SoliderName.TURNING_MACHINE: {SoliderAttr.SOLIDER_TYPE: UnitType.DATA,SoliderAttr.ACTION_MODE: ActionMode.MOVING_ATTACK, SoliderAttr.SOLIDER_ORIGINAL_HP: 400,SoliderAttr.SOLIDER_ORIGINAL_ATTACK: 10, SoliderAttr.ATTACK_RANGE: 10, SoliderAttr.SPEED: 2},
+    SoliderName.ULTRON: {SoliderAttr.SOLIDER_TYPE: UnitType.SUBSTANCE, SoliderAttr.ACTION_MODE: ActionMode.BUILDING_ATTACK,SoliderAttr.SOLIDER_ORIGINAL_HP: 200, SoliderAttr.SOLIDER_ORIGINAL_ATTACK: 1000,SoliderAttr.ATTACK_RANGE: 10, SoliderAttr.SPEED: 8},
+}
+
+#****************************************************************************************************************************************************************
+
+#***************************************************************************Basic Class*****************************************************************************
+class Resource(obejct):
+    def __init__(self,building_point_1,building_point_2,resource_1,resource_2):
+        self.__building_point_1=building_point_1
+        self.__building_point_2=building_point_2
+        self.__resource_1=resource_1
+        self.__resource_2=resource_2
+
+    @property
+    def building_point_1(self):
+        return self.__building_point_1
+
+    @property
+    def building_point_2(self):
+        return self.__building_point_2
+
+    @property
+    def resource_1(self):
+        return self.__resource_1
+
+    @property
+    def resource_2(self):
+        return self.__resource_2
+
+class Position(object):
+    def __init__(self,x,y):
+        self.__x=x
+        self.__y=y
+
+    @property
+    def x(self):
+        return self.__x
+    @property
+    def y(self):
+        return self.__y
 
 class Building(object):
-    def __init__(self, time, basic_hp, unlock_time, basic_source, basic_building_ability):
-        self.__HP = basic_hp * (0.5 + 0.5 * time)
-        self.__Time = unlock_time
-        self.__Source = basic_source * (0.5 + 0.5 * time)
-        self.__Building_Ability = basic_building_ability * (0.5 + 0.5 * time)
+    def __init__(self,building_type,hp,pos,flag,unit_id,maintain):
+        self.__BuildingType=building_type
+        self.__HP=hp
+        self.__Position=pos
+        self.__Flag=flag
+        self.__Unit_ID=unit_id
+        self.__Is_Maintain=maintain
 
     @property
     def HP(self):
         return self.__HP
+    @HP.setter
+    def HP(self,hp):
+        #some condition
+        self.__HP=hp
+    @property
+    def BuildingType(self):
+        return self.__BuildingType
 
+    @property
+    def Position(self):
+        return self.__Position
+
+    @property
+    def Flag(self):
+        return self.__Flag
+
+    @property
+    def Unit_ID(self):
+        return self.__Unit_ID
+
+    @property
+    def Is_Maintain(self):
+        return self.__Is_Maintain
+
+class Solider(object):
+    def __init__(self,solider_name,hp,pos,flag):
+        self.__Solider_Name=solider_name
+        self.__HP=hp
+        self.__Position=pos
+        self.__Flag=flag
+
+    @property
+    def HP(self):
+        return self.__HP
     @HP.setter
     def HP(self, hp):
         # some condition
         self.__HP = hp
 
     @property
-    def Time(self):
-        return self.__Time
-
-    @Time.setter
-    def Time(self, time):
-        # some condition
-        self.__Time = time
+    def Solider_Name(self):
+        return self.__Solider_Name
 
     @property
-    def Source(self):
-        return self.__Source
-
-    @Source.setter
-    def Source(self, source):
-        # some conditon here
-        self.__Source = source
+    def Position(self):
+        return self.__Position
 
     @property
-    def Building_Ability(self):
-        return self.__Building_Ability
+    def Flag(self):
+        return self.__Flag
 
-    @Building_Ability.setter
-    def Building_Ability(self, b):
-        # some condition here
-        self.__Building_Ability = b
-
-
-class Produce_Building(Building):
-    def __init__(self, time, basic_hp, unlock_time, basic_source, basic_building_ability, produce_range, produce_cd, produce_unit):
-        self.__Produce_Range = produce_range
-        self.__Produce_CD = produce_cd
-        self.__Produce_Unit = produce_unit
-        Building.__init__(self, time, basic_hp, unlock_time,
-                          basic_source, basic_building_ability)
-
-    @property
-    def Produce_Range(self):
-        return self.__Produce_Range
-
-    @Produce_Range.setter
-    def Produce_Range(self, range):
-        # some condition here
-        self.__Produce_Range = range
-
-    @property
-    def Produce_CD(self):
-        return self.__Produce_CD
-
-    @Produce_CD.setter
-    def Produce_CD(self, cd):
-        # some condition here
-        self.__Produce_CD = cd
-
-    @property
-    def Produce_Unit(self):
-        return self.__Produce_Unit
-
-    @Produce_Unit.setter
-    def Produce_Unit(self, unit):
-        # some condition here
-        self.__Produce_Unit = unit
-
-
-class Defence_Building(Building):
-    def __init__(self, time, basic_hp, unlock_time, basic_source, basic_building_ability, attack_cd, attack_range, attack_hurt, attack_target, aoe):
-        self.__Attack_CD = attack_cd
-        self.__Attack_Range = attack_range
-        self.__Attack_Target = attack_target
-        self.__Attack_Hurt = attack_hurt
-        self.__AOE = aoe
-        Building.__init__(self, basic_hp, time, unlock_time,
-                          basic_source, basic_building_ability)
-
-    @property
-    def Attack_CD(self):
-        return self.__Attack_CD
-
-    @Attack_CD.setter
-    def Attack_CD(self, cd):
-        # some condition here
-        self.__Attack_CD = cd
-
-    @property
-    def Attack_Range(self):
-        return self.__Attack_Range
-
-    @Attack_Range.setter
-    def Attack_Range(self, range):
-        # some condition here
-        self.__Attack_Range = range
-
-    @property
-    def Attack_Target(self):
-        return self.__Attack_Target
-
-    @Attack_Target.setter
-    def Attack_Target(self, target):
-        # some condition here
-        self.__Attack_Target = target
-
-    @property
-    def AOE(self):
-        return self.AOE
-
-    @AOE.setter
-    def AOE(self, aoe):
-        # some condition here
-        self.__AOE = aoe
-
-
-class Unit(object):
-    def __init__(self, Type, time, behaviour_mode, basic_hp, basic_attack_hurt, attack_range, move_speed):
-        self.__Type = Type
-        self.__HP = basic_hp * (0.5 * time + 0.5)
-        self.__Behaviour_Mode = behaviour_mode
-        self.__Attack_Hurt = basic_attack_hurt * (0.5 + 0.5 * basic_hp)
-        self.__Attack_Range = attack_range
-        self.__Move_Speed = move_speed
-
-    @property
-    def HP(self):
-        return self.__HP
-
-    @HP.setter
-    def HP(self, hp):
-        # some condition
-        self.__HP = hp
-
-    @property
-    def Type(self):
-        return self.__Type
-
-    @property
-    def Behaviour_Mode(self):
-        return self.__Behaviour_Mode
-
-    @property
-    def Attack_Hurt(self):
-        return self.__Attack_Hurt
-
-    @Attack_Hurt.setter
-    def Attack_Hurt(self, hurt):
-        # some condition here
-        self.__Attack_Hurt = hurt
-
-    @property
-    def Attack_Range(self):
-        return self.__Attack_Range
-
-    @Attack_Range.setter
-    def Attack_Range(self, range):
-        # some condition here
-        self.__Attack_Range = range
-
-    @property
-    def Move_Speed(self):
-        return self.__Move_Speed
-
-    @Move_Speed.setter
-    def Move_Speed(self, speed):
-        # some condition here
-        self.Move_Speed = speed
-
-
-#**********************************************************************************************************
-
-#********************************************Resource Building***********************************
-
-class Resource_Building(object):
-    def __init__(self, time):
-        self.HP = 100 * (0.5 + time * 0.5)
-        self.Get_Resource_Value = 50
-
-
-#******************************************Produce Building******************************************
-
-class Shannon(Produce_Building):
-    def __init__(self, time):
-        Produce_Building.__init__(
-            self, time, 100, BYTE, 100, 10, 10, 1, BYTESTREAM)
-
-
-class Thevenin(Produce_Building):
-    def __init__(self, time):
-        Produce_Building.__init__(
-            self, time, 120, CIRCUIT, 120, 12, 5, 2, USOURCE)
-
-
-class Norton(Produce_Building):
-    def __init__(self, time):
-        Produce_Building.__init__(
-            self, time, 120, CIRCUIT, 120, 12, 5, 2, ISOURCE)
-
-
-class Von_Neumann(Produce_Building):
-    def __init__(self, time):
-        Produce_Building.__init__(self, time, 150, CPU, 150, 16, 15, 5, ENIAC)
-
-
-class Berners_Lee(Produce_Building):
-    def __init__(self, time):
-        Produce_Building.__init__(
-            self, time, 360, NETWORK, 360, 12, 30, 1, DATAPACKAGE)
-
-
-class Kuen_Kao(Produce_Building):
-    def __init__(self, time):
-        Produce_Building.__init__(
-            self, time, 300, NETWORK, 300, 30, 15, 3, OPTICAL)
-
-
-class Turning(Produce_Building):
-    def __init__(self, time):
-        Produce_Building.__init__(
-            self, time, 600, AI, 600, 20, 15, 8, TURINGMACHINE)
-
-
-class Tony_Stark(Produce_Building):
-    def __init__(self, time):
-        Produce_Building.__init__(
-            self, time, 1000, AI, 1000, 80, 10, 10, ULTRON)
-
-
-#******************************************************************************************************
-
-#*****************************************Defence Building**************************************************
-
-class Bool(Defence_Building):
-    def __init__(self, time):
-        Defence_Building.__init__(
-            self, time, 150, BYTE, 150, 15, 1, 20, 16, DATA, 0)
-
-    def skill(self):
-        pass
-
-
-class Ohm(Defence_Building):
-    def __init__(self, time):
-        Defence_Building.__init__(
-            self, time, 180, CIRCUIT, 180, 20, 3, 25, 10, ENTITY, 3)
-
-    def skill(self):
-        pass
-
-
-class Nole(Defence_Building):
-    def __init__(self, time):
-        Defence_Building.__init__(
-            self, time, 225, DATA, 225, 25, 1, 35, 4, DATA, 0)
-
-    def skill(self):
-        pass
-
-
-class Monte_Carlo(Defence_Building):
-    def __init__(self, time):
-        Defence_Building.__init__(
-            self, time, 300, ALGORITHM, 300, 30, 2, 25, 25, ENTITY, 0)
-
-    def skill(self):
-        pass
-
-
-class Larry_Roberts(Defence_Building):
-    def __init__(self, time):
-        Defence_Building.__init__(
-            self, time, 480, NETWORK, 480, 50, 1, 25, 5, ALL, 2)
-
-    def skill(self):
-        pass
-
-
-class Robert_Kabn(Defence_Building):
-    def __init__(self, time):
-        Defence_Building.__init__(
-            self, time, 450, NETWORK, 450, 45, 1, 30, None, DATA, 0)  # 攻击力暂未设定
-
-    def skill(self):
-        pass
-
-
-class Musk(Defence_Building):
-    def __init__(self, time):
-        Defence_Building.__init__(
-            self, time, 900, AI, 900, 90, 1, 10, 0, ALL, 0)
-
-    def skill(self):
-        pass
-
-
-class Hawkin(Defence_Building):
-    def __init__(self, time):
-        Defence_Building.__init__(
-            self, time, 1500, AI, 1500, 100, 5, 10, Inf, ALL, 1)
-
-    def skill(self):
-        pass
-
-
-#**************************************************************************************************************
-
-#************************************************Unit***************************************
-
-class Bytestream(Unit):
-    def __init__(self, time):
-        Unit.__init__(self, DATA, time, ATTACK_TOWER, 10, 10, 8, 8)
-
-
-class Usource(Unit):
-    def __init__(self, time):
-        Unit.__init__(self, ENTITY, time, ATTACK_TOWER, 30, 16, 12, 6)
-
-
-class Isource(Unit):
-    def __init__(self, time):
-        Unit.__init__(self, ENTITY, time, GO_STRAIGHT, 30, 160, 1, 6)
-
-
-class Eniac(Unit):
-    def __init__(self, time):
-        Unit.__init__(self, ENTITY, time, DEFENCE_ATTACK, 200, 15, 5, 3)
-
-
-class DataPackage(Unit):
-    def __init__(self, time):
-        Unit.__init__(self, DATA, time, GO_STRAIGHT, 30, 200, 1, 16)
-
-
-class Optical(Unit):
-    def __init__(self, time):
-        Unit.__init__(self, ENTITY, time, ATTACK_TOWER, 40, 15, 30, 10)
-
-
-class TurningMachine(Unit):
-    def __init__(self, time):
-        Unit.__init__(self, DATA, time, DEFENCE_ATTACK, 400, 10, 10, 2)
-
-
-class Ultron(Unit):
-    def __init__(self, time):
-        Unit.__init__(self, ENTITY, time, ATTACK_TOWER, 200, 1000, 10, 8)
-
-
-#**************************************************************************************************************
+#***************************************************************************************************************************************************************************************************
