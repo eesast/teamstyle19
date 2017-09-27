@@ -3,10 +3,11 @@ from unit import *
 
 class GameMain:
     _map_size = 200
+    _map = [[0] * _map_size] * _map_size
     turn_num = 0
+    winner = 3
 
-    units = [{[]
-              }] * 2
+    units = [{}] * 2
 
     main_base = [None] * 2
 
@@ -40,8 +41,14 @@ class GameMain:
         'upgrade': [],
         'sell': [],
         'update_age': [],
-        'resource': []
+        'resource': False
     }] * 2
+
+    def init_map_random(self):
+        pass
+
+    def init_map_from_bitmap(self):
+        pass
 
     def __init__(self, init_map):
         pass
