@@ -12,15 +12,15 @@ class GameMain:
     main_base = [None] * 2
 
     buildings = [{
-        'produce_building': [],
-        'defence_building': [],
-        'resource_building': []
+        'produce': [],
+        'defence': [],
+        'resource': []
     }] * 2
 
     status = [{
         'money': 0,
         'tech': 0,
-        'building_ability': 0,
+        'building': 0,
     }] * 2
 
     # 通信模块将收到的指令写入，各阶段函数从中读取指令，指令格式同api_player.h
@@ -99,19 +99,17 @@ class GameMain:
         """Produce new resource"""
         pass
 
-    def update_id(self):
-        """Remove the id of destroyed units"""
-        pass
-
     def next_tick(self):
         """回合演算与指令合法性判断"""
         self.attack_phase()
         self.clean_up_phase()
         self.move_phase()
+
         self.check_legal()
+
         self.building_phase()
         self.produce_phase()
         self.update_age_phase()
         self.resource_phase()
-        self.update_id()
+        # self.update_id()
         self.judge_winnner()
