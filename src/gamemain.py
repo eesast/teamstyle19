@@ -56,7 +56,7 @@ class GameMain:
     def __init__(self, init_map):
         pass
 
-    def judge_winnner(self):
+    def judge_winner(self):
         pass
 
     def check_legal(self):
@@ -116,4 +116,4 @@ class GameMain:
         self.update_age_phase()
         self.resource_phase()
         # self.update_id()
-        self.judge_winnner()
+        self.judge_winner()
