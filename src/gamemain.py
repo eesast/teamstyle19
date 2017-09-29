@@ -3,11 +3,11 @@ from unit import *
 
 class GameMain:
     _map_size = 200
-    _map = [[0] * _map_size] * _map_size
+    _map = [[[0] for i in range(_map_size)] for i in range(_map_size)]
     turn_num = 0
     winner = 3
 
-    units = [{}] * 2
+    units = [{} for i in range(2)]
 
     main_base = [None] * 2
 
@@ -15,13 +15,13 @@ class GameMain:
         'produce': [],
         'defence': [],
         'resource': []
-    }] * 2
+    } for i in range(2)]
 
     status = [{
         'money': 0,
         'tech': 0,
         'building': 0,
-    }] * 2
+    } for i in range(2)]
 
     # 通信模块将收到的指令写入，各阶段函数从中读取指令，指令格式同api_player.h
     raw_instruments = [{
@@ -30,7 +30,7 @@ class GameMain:
         'upgrade': [],  # id
         'sell': [],  # id
         'update_age': False,
-    }] * 2
+    } for i in range(2)]
 
     # 各阶段函数处理过raw_instruments后将有效的指令写入，最后将其中的指令写入回放文件
     instruments = [{
@@ -42,7 +42,7 @@ class GameMain:
         'sell': [],
         'update_age': [],
         'resource': False
-    }] * 2
+    } for i in range(2)]
 
     def init_map_random(self):
         pass
