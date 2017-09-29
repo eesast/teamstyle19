@@ -5,7 +5,7 @@
 
 //definition of enumeration
 enum UnitType {
-    Base, 
+    Base,
 
     PRODUCTION_BUILDING,
     DEFENSIVE_BUILDING,
@@ -29,7 +29,7 @@ enum BuildingType{
     //base
     __Base,
 
-    //buidings for producing
+    //buildings for producing
     Shannon,
     Thevenin,
     Norton,
@@ -61,7 +61,7 @@ enum BuildingAttribute {
                       //For resources buildings, it stands for Collective_Value
                       //For production buildings, it means nothing set as _NULL
 
-    ORGINAL_RANGE,    //FOr production buildings, it stands for the range of production,
+    ORIGINAL_RANGE,    //FOr production buildings, it stands for the range of production,
                       //For defensive buildings, it stands for the range of attacking
                       //For resource buildings, it means nothing
 
@@ -150,7 +150,7 @@ struct Resource {
 
     int resource_1;
     int resource_2;
-    Resource(int building_point_1=0, int building_point_2=0, int resource_1=0, int resource_2=0): 
+    Resource(int building_point_1=0, int building_point_2=0, int resource_1=0, int resource_2=0):
         building_point_1(building_point_1), building_point_2(building_point_2), resource_1(resource_1), resource_2(resource_2) {}
 };
 
@@ -184,7 +184,7 @@ struct Building {
 
 //API for players
 void updateAge();
-void construct(BuildingType building_type, Position pos, Position solider_pos); //The solier position is not set now
+void construct(BuildingType building_type, Position pos, Position solider_pos); //The solider position is not set now
 void upgrade(int unit_id);
 void sell(int unit_id);
 void toggleMaintain(int unit_id);

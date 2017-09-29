@@ -1,4 +1,7 @@
-from unit import *
+#! /usr/bin/env python3
+# -*- coding: utf-8 -*-
+
+from .unit import *
 
 
 class GameMain:
@@ -53,7 +56,7 @@ class GameMain:
     def __init__(self, init_map):
         pass
 
-    def judge_winnner(self):
+    def judge_winner(self):
         pass
 
     def check_legal(self):
@@ -74,18 +77,19 @@ class GameMain:
 
     def building_phase(self):
         """Deal with the instruments about buildings"""
+        pass
 
-        def construct_phase(self):
-            pass
+    def construct_phase(self):
+        pass
 
-        def maintain_phase(self):
-            pass
+    def maintain_phase(self):
+        pass
 
-        def upgrade_phase(self):
-            pass
+    def upgrade_phase(self):
+        pass
 
-        def sell_phase(self):
-            pass
+    def sell_phase(self):
+        pass
 
     def produce_phase(self):
         """Unit production by producing building"""
@@ -112,4 +116,4 @@ class GameMain:
         self.update_age_phase()
         self.resource_phase()
         # self.update_id()
-        self.judge_winnner()
+        self.judge_winner()
