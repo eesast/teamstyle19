@@ -25,10 +25,10 @@ class GameMain:
 
     # 通信模块将收到的指令写入，各阶段函数从中读取指令，指令格式同api_player.h
     raw_instruments = [{
-        'construct': [],
-        'maintain': [],
-        'upgrade': [],
-        'sell': [],
+        'construct': [],  # (BuildingType,(BuildingPos.x,BuildingPos.y),(SoldierPos.x,SoldierPos.y))
+        'maintain': [],  # id
+        'upgrade': [],  # id
+        'sell': [],  # id
         'update_age': False,
     }] * 2
 
