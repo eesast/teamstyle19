@@ -4,7 +4,6 @@ def init_map_from_bitmap(self,path):
     #_map = [[0 for i in range(_map_size)] for i in range(_map_size)]
 
     img = Image.open(path)
-    _map = [[0] * _map_size for i in range(_map_size)]
     size = (_map_size, _map_size)
     img = img.resize(size, Image.ANTIALIAS)  # 放缩大小，直接用一个像素对应地图上的一个点
 
