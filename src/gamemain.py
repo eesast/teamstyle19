@@ -128,7 +128,6 @@ class GameMain:
 
         self.status[0]['building'] = self.status[0]['tech'] * 60 + 100
         self.status[1]['building'] = self.status[1]['tech'] * 60 + 100
-        pass
 
     def next_tick(self):
         """回合演算与指令合法性判断"""
