@@ -1,5 +1,5 @@
 from unit import *
-
+from unit import Age
 
 class GameMain:
     _map_size = 200
@@ -93,10 +93,41 @@ class GameMain:
 
     def update_age_phase(self):
         """Deal with the update_age instruments"""
-        pass
+        basic_consumption = 0  #基础升级科技消耗，未定
+        increased_consumption = 0   #科技每升一级，下次升级科技资源消耗增量
+
+        if  self.instruments[0]['update_age']:
+            consumption = basic_consumption + increased_consumption*self.status[0]['tech']
+            if  self.status[0]['money'] > consumption and self.status[0]['tech'] < Age.AI:
+                self.status[0]['money'] -= consumption
+                self.status[0]['tech'] += 1
+            else:
+                pass
+        if self.instruments[1]['update_age']:
+            consumption = basic_consumption + increased_consumption * self.status[1]['tech']
+            if self.status[1]['money'] > consumption and self.status[1]['tech'] < Age.AI:
+                self.status[1]['money'] -= consumption
+                self.status[1]['tech'] += 1
+            else:
+                pass
 
     def resource_phase(self):
-        """Produce new resource"""
+        """Produce new resource and refresh building force"""
+
+        basic_resource=50
+        resource0=0
+        resource1=0
+
+        for i in self.buildings[0]['resource']:
+            resource0 += (basic_resource * 0.5 * (self.status[0]['tech']+2))
+        for i in self.buildings[1]['resource']:
+            resource1 += (basic_resource * 0.5 * (self.status[1]['tech']+2))
+
+        self.status[0]['money'] += resource0
+        self.status[1]['money'] += resource1
+
+        self.status[0]['building'] = self.status[0]['tech'] * 60 + 100
+        self.status[1]['building'] = self.status[1]['tech'] * 60 + 100
         pass
 
     def next_tick(self):
