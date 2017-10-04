@@ -105,7 +105,7 @@ BuildingType.Robert_Kahn:{ BuildingAttribute.BUILDING_TYPE:UnitType.DEFENSIVE_BU
 BuildingType.Musk:{ BuildingAttribute.BUILDING_TYPE:UnitType.DEFENSIVE_BUILDING, BuildingAttribute.ORIGINAL_HP:900 , BuildingAttribute.ORIGINAL_ATTACK:0, BuildingAttribute.ORIGINAL_RANGE:10 ,BuildingAttribute.TRAGET:UnitType.ALL ,BuildingAttribute.AGE:Age.AI ,BuildingAttribute.ORIGINAL_RESOURCE:900 ,BuildingAttribute.ORIGINAL_BUILDING_POINT:90 ,BuildingAttribute.AOE:0 ,BuildingAttribute.CD: 1},
 BuildingType.Hawkin:{ BuildingAttribute.BUILDING_TYPE:UnitType.DEFENSIVE_BUILDING , BuildingAttribute.ORIGINAL_HP:1500 , BuildingAttribute.ORIGINAL_ATTACK:Inf, BuildingAttribute.ORIGINAL_RANGE:10 ,BuildingAttribute.TRAGET:UnitType.ALL ,BuildingAttribute.AGE:Age.AI ,BuildingAttribute.ORIGINAL_RESOURCE:1500 ,BuildingAttribute.ORIGINAL_BUILDING_POINT:100 ,BuildingAttribute.AOE:1 ,BuildingAttribute.CD: 5},
 
-BuildingType.Programmer:{ BuildingAttribute.BUILDING_TYPE:UnitType.DEFENSIVE_BUILDING , BuildingAttribute.ORIGINAL_HP:100 , BuildingAttribute.ORIGINAL_ATTACK:50},  #use attack stand for the ability of resource building to get resource
+BuildingType.Programmer:{ BuildingAttribute.BUILDING_TYPE:UnitType.RESOURCE_BUILDING , BuildingAttribute.ORIGINAL_HP:100 , BuildingAttribute.ORIGINAL_ATTACK:50},  #use attack stand for the ability of resource building to get resource
 }
 
 OriginalSoliderAttribute={
@@ -122,7 +122,7 @@ OriginalSoliderAttribute={
 #****************************************************************************************************************************************************************
 
 #***************************************************************************Basic Class*****************************************************************************
-class Resource(obejct):
+class Resource(object):
     def __init__(self,building_point_1,building_point_2,resource_1,resource_2):
         self.__building_point_1=building_point_1
         self.__building_point_2=building_point_2
