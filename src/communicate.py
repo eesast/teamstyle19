@@ -3,6 +3,20 @@ import threading
 import queue
 import struct
 import time
+from enum import Enum
+
+
+class MsgType(Enum):
+    Id = 1
+    Map = 2
+    Data = 3
+    Instr = 4
+    GameOver = 5
+
+
+def dump_id(id_num):
+    data = struct.pack("ii", MsgType.Id.value, id_num)
+    return data
 
 
 class IOHandler(threading.Thread):
@@ -24,9 +38,10 @@ class IOHandler(threading.Thread):
         return not self.info_queue.empty()
 
     def run(self):
-        while (self.game_going):
+        while self.game_going:
             if self.writable():
                 data = self.info_queue.get(block=False)
+                data = struct.pack("i", len(data)) + data
                 try:
                     while data:
                         send_len = self.socket.send(data)
@@ -37,22 +52,22 @@ class IOHandler(threading.Thread):
             if self.readable():
                 try:
                     instructions = self.socket.recv(4096)
+                    if instructions:
+                        if not self.pending_size and len(instructions) >= 4:
+                            self.pending_size = struct.unpack("i", instructions[:4])[0]
+                            instructions = instructions[4:]
+                        self.pending_size -= len(instructions)
+                        self.mutex.acquire()
+                        self.instructions += instructions
+                        self.mutex.release()
+                        if self.pending_size <= 0:
+                            self.wait_for_recv = False
+                            self.pending_size = 0
                 except ConnectionResetError:
                     self.pending_size = 0
-                    self.wait_for_read = False
+                    self.wait_for_recv = False
                 except BlockingIOError:
-                    continue
-                if instructions:
-                    if not self.pending_size:
-                        self.pending_size = struct.unpack("i", instructions[:4])[0]
-                        instructions = instructions[4:]
-                    self.pending_size -= len(instructions)
-                    self.mutex.acquire()
-                    self.instructions += instructions
-                    self.mutex.release()
-                    if self.pending_size <= 0:
-                        self.wait_for_read = False
-                        self.pending_size = 0
+                    pass
 
     def dump(self):
         instructions = self.instructions
@@ -75,22 +90,26 @@ class MainServer:
             self.info_queues.append(queue.Queue())
             self.threads.append(IOHandler(conn, self.info_queues[i]))
             self.threads[i].start()
-            print("Client {0} connected".format(i + 1))
-            ai_id = struct.pack("i", i)
-            self.threads[i].info_queue.put(ai_id)
+            print("Client {0} connected".format(i))
+            self.threads[i].info_queue.put(dump_id(i))
         while not (self.info_queues[0].empty() or self.info_queues[1].empty()):
             pass
 
-    def send_to_player(self, data):
+    def send_to_players(self, data):
         for q in self.info_queues:
             q.put(data)
         while not (self.info_queues[0].empty() or self.info_queues[1].empty()):
-            time.sleep(0.1)
+            pass
+
+    def send_to_player(self, data, aim_id):
+        self.info_queues[aim_id].put(data)
+        while not (self.info_queues[aim_id].empty()):
+            pass
 
     def recv_instructions(self):
         for handler in self.threads:
             handler.wait_for_recv = True
-        time.sleep(5)
+        time.sleep(0.1)
         instructions = []
         for handler in self.threads:
             handler.mutex.acquire()
@@ -99,16 +118,42 @@ class MainServer:
             handler.mutex.release()
         return instructions
 
+    def close(self):
+        for thread in self.threads:
+            thread.game_going = False
+        for thread in self.threads:
+            thread.join()
+
 
 def main():
-    server = MainServer("127.0.0.1", 5708)
+    server = MainServer("127.0.0.1", 5818)
     server.wait_for_connection()
-    while True:
-        texts = server.recv_instructions()
-        print(texts[0])
-        print(texts[1])
-        server.send_to_player("Received".encode("utf-8"))
-
+    player1, player2 = True, True
+    for i in range(100):
+        print("Round", i)
+        msg = struct.pack("ii", MsgType.Id.value, i)
+        if player1 and player2:
+            server.send_to_players(msg)
+        elif player1:
+            server.send_to_player(msg, 0)
+        elif player2:
+            server.send_to_player(msg, 1)
+        data = server.recv_instructions()
+        player1, player2 = False, False
+        if data[0]:
+            playerNum1 = struct.unpack("i", data[0][4:])[0]
+            print("Player 1:", playerNum1, end=' ')
+            player1 = True
+        else:
+            print("Player 1 miss", end=' ')
+        if data[1]:
+            playerNum2 = struct.unpack("i", data[1][4:])[0]
+            print("Player 2:", playerNum2)
+            player2 = True
+        else:
+            print("Player 2 miss")
+    server.send_to_players(struct.pack("i", MsgType.GameOver.value))
+    server.close()
 
 if __name__ == "__main__":
     main()
