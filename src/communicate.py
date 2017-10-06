@@ -1,10 +1,8 @@
-import socket
-import threading
-import queue
-import struct
 import time
+import socket
+import struct
+import queue
 from enum import Enum
-
 
 class MsgType(Enum):
     Id = 1
@@ -19,111 +17,128 @@ def dump_id(id_num):
     return data
 
 
-class IOHandler(threading.Thread):
-    def __init__(self, sock: socket.socket, q: queue.Queue):
-        threading.Thread.__init__(self)
-        self.socket = sock
-        self.socket.settimeout(0)
-        self.info_queue = q
-        self.wait_for_recv = False
-        self.game_going = True
-        self.instructions = bytes()
-        self.pending_size = 0
-        self.mutex = threading.Lock()
+def wait_for(seconds: float):
+    start_time = time.clock()
+    while ((time.clock() - start_time) < seconds):
+        yield
 
-    def readable(self):
-        return self.wait_for_recv
 
-    def writable(self):
-        return not self.info_queue.empty()
+def sendall(socket: socket.socket, data):
+    data = struct.pack("i", len(data)) + data
+    while data:
+        yield
+        try:
+            send_len = socket.send(data)
+            data = data[send_len:]
+        except BlockingIOError:
+            pass
+        except ConnectionResetError:
+            break
+
+
+def receive(socket: socket.socket):
+    pending_size = None
+    total_data = b''
+    while True:
+        yield
+        try:
+            data = socket.recv(4096)
+            if pending_size is None and len(data) >= 4:
+                pending_size = struct.unpack("i", data[:4])[0]
+                data = data[4:]
+            pending_size -= len(data)
+            total_data += data
+            if pending_size <= 0:
+                break
+        except BlockingIOError:
+            pass
+        except ConnectionResetError:
+            break
+    return total_data
+
+
+def wait_for_connection(socket: socket.socket, connect_num: int):
+    clients = []
+    for i in range(connect_num):
+        while True:
+            try:
+                conn, _ = socket.accept()
+                clients.append(conn)
+                yield Task(sendall(conn, dump_id(i)))
+                break
+            except BlockingIOError:
+                yield
+    return clients
+
+
+class Task:
+    def __init__(self, target):
+        self.target = target
+        self.data = b''
 
     def run(self):
-        while self.game_going:
-            if self.writable():
-                data = self.info_queue.get(block=False)
-                data = struct.pack("i", len(data)) + data
-                try:
-                    while data:
-                        send_len = self.socket.send(data)
-                        data = data[send_len:]
-                except ConnectionResetError:
-                    pass
+        try:
+            return self.target.send(None)
+        except StopIteration as e:
+            self.data = e.value
+            raise e
 
-            if self.readable():
-                try:
-                    instructions = self.socket.recv(4096)
-                    if instructions:
-                        if not self.pending_size and len(instructions) >= 4:
-                            self.pending_size = struct.unpack("i", instructions[:4])[0]
-                            instructions = instructions[4:]
-                        self.pending_size -= len(instructions)
-                        self.mutex.acquire()
-                        self.instructions += instructions
-                        self.mutex.release()
-                        if self.pending_size <= 0:
-                            self.wait_for_recv = False
-                            self.pending_size = 0
-                except ConnectionResetError:
-                    self.pending_size = 0
-                    self.wait_for_recv = False
-                except BlockingIOError:
-                    pass
+    def close(self):
+        self.target.close()
 
-    def dump(self):
-        instructions = self.instructions
-        self.instructions = bytes()
-        return instructions
+
+def Scheduler(tasks, timeout):
+    ready = queue.Queue()
+    for task in tasks:
+        ready.put(task)
+    while not ready.empty():
+        try:
+            if not timeout is None:
+                timeout.send(None)
+        except StopIteration:
+            break
+        task = ready.get(block=False)
+        try:
+            result = task.run()
+            if not result is None:
+                ready.put(result)
+            ready.put(task)
+        except StopIteration:
+            pass
+    for task in tasks:
+        task.close()
+    if not timeout is None:
+        timeout.close()
+    instructions = [task.data for task in tasks]
+    return instructions
+
+
 
 
 class MainServer:
     def __init__(self, host_address, port):
-        self.threads = []
-        self.info_queues = []
+        self.clients = []
         self.socket = socket.socket()
+        self.socket.settimeout(0)
         self.socket.bind((host_address, port))
         self.socket.listen(2)
-        self.instructions = []
 
     def wait_for_connection(self):
-        for i in range(2):
-            conn, _ = self.socket.accept()
-            self.info_queues.append(queue.Queue())
-            self.threads.append(IOHandler(conn, self.info_queues[i]))
-            self.threads[i].start()
-            print("Client {0} connected".format(i))
-            self.threads[i].info_queue.put(dump_id(i))
-        while not (self.info_queues[0].empty() or self.info_queues[1].empty()):
-            pass
+        self.clients = Scheduler([Task(wait_for_connection(self.socket, 2))], timeout=None)[0]
 
     def send_to_players(self, data):
-        for q in self.info_queues:
-            q.put(data)
-        while not (self.info_queues[0].empty() or self.info_queues[1].empty()):
-            pass
-
-    def send_to_player(self, data, aim_id):
-        self.info_queues[aim_id].put(data)
-        while not (self.info_queues[aim_id].empty()):
-            pass
+        Scheduler([Task(sendall(sock, data)) for sock in self.clients], wait_for(0.1))
 
     def recv_instructions(self):
-        for handler in self.threads:
-            handler.wait_for_recv = True
-        time.sleep(0.1)
-        instructions = []
-        for handler in self.threads:
-            handler.mutex.acquire()
-            handler.wait_for_recv = False
-            instructions.append(handler.dump())
-            handler.mutex.release()
-        return instructions
+        return Scheduler([Task(receive(sock)) for sock in self.clients], wait_for(0.1))
+
+    def send_to_player(self, data, aim_id):
+        Scheduler([Task(sendall(self.clients[aim_id], data))], wait_for(0.1))
 
     def close(self):
-        for thread in self.threads:
-            thread.game_going = False
-        for thread in self.threads:
-            thread.join()
-
+        for sock in self.clients:
+            sock.close()
+        self.socket.close()
 
 def main():
     server = MainServer("127.0.0.1", 5818)
