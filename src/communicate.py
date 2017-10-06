@@ -43,14 +43,13 @@ def receive(socket: socket.socket):
         yield
         try:
             data = socket.recv(4096)
-            if data:
-                if pending_size is None and len(data) >= 4:
-                    pending_size = struct.unpack("i", data[:4])[0]
-                    data = data[4:]
-                pending_size -= len(data)
-                total_data += data
-                if pending_size <= 0:
-                    break
+            if pending_size is None and len(data) >= 4:
+                pending_size = struct.unpack("i", data[:4])[0]
+                data = data[4:]
+            pending_size -= len(data)
+            total_data += data
+            if pending_size <= 0:
+                break
         except BlockingIOError:
             pass
         except ConnectionResetError:
@@ -59,7 +58,6 @@ def receive(socket: socket.socket):
 
 
 def wait_for_connection(socket: socket.socket, connect_num: int):
-    socket.listen(connect_num)
     clients = []
     for i in range(connect_num):
         while True:
@@ -123,6 +121,7 @@ class MainServer:
         self.socket = socket.socket()
         self.socket.settimeout(0)
         self.socket.bind((host_address, port))
+        self.socket.listen(2)
 
     def wait_for_connection(self):
         self.clients = Scheduler([Task(wait_for_connection(self.socket, 2))], timeout=None)[0]
