@@ -248,14 +248,14 @@ class GameMain:
         basic_consumption = 0  #基础升级科技消耗，未定
         increased_consumption = 0   #科技每升一级，下次升级科技资源消耗增量
 
-        if  self.instruments[0]['update_age']:
+        if  self.raw_instruments[0]['update_age']:
             consumption = basic_consumption + increased_consumption*self.status[0]['tech']
             if  self.status[0]['money'] > consumption and self.status[0]['tech'] < Age.AI:
                 self.status[0]['money'] -= consumption
                 self.status[0]['tech'] += 1
             else:
                 pass
-        if self.instruments[1]['update_age']:
+        if self.raw_instruments[1]['update_age']:
             consumption = basic_consumption + increased_consumption * self.status[1]['tech']
             if self.status[1]['money'] > consumption and self.status[1]['tech'] < Age.AI:
                 self.status[1]['money'] -= consumption
