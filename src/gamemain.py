@@ -247,40 +247,25 @@ class GameMain:
         """Deal with the update_age instruments"""
         basic_consumption = 0  #基础升级科技消耗，未定
         increased_consumption = 0   #科技每升一级，下次升级科技资源消耗增量
-
-        if  self.raw_instruments[0]['update_age']:
-            consumption = basic_consumption + increased_consumption*self.status[0]['tech']
-            if  self.status[0]['money'] > consumption and self.status[0]['tech'] < Age.AI:
-                self.status[0]['money'] -= consumption
-                self.status[0]['tech'] += 1
-            else:
-                pass
-        if self.raw_instruments[1]['update_age']:
-            consumption = basic_consumption + increased_consumption * self.status[1]['tech']
-            if self.status[1]['money'] > consumption and self.status[1]['tech'] < Age.AI:
-                self.status[1]['money'] -= consumption
-                self.status[1]['tech'] += 1
-            else:
-                pass
-
+        for flag in range(2):
+           if self.raw_instruments[flag]['update_age']:
+                consumption = basic_consumption + increased_consumption*self.status[flag]['tech']
+                if self.status[flag]['money'] > consumption and self.status[flag]['tech'] < Age.AI:
+                    self.status[flag]['money'] -= consumption
+                    self.status[flag]['tech'] += 1
+                    self.instruments[flag]['update_age'].append(true)
+                else:
+                    self.instruments[flag]['update_age'].append(false)
     def resource_phase(self):
         """Produce new resource and refresh building force"""
-
-        basic_resource=50
-        resource0=0
-        resource1=0
-
-        for i in self.buildings[0]['resource']:
-            resource0 += (basic_resource * 0.5 * (self.status[0]['tech']+2))
-        for i in self.buildings[1]['resource']:
-            resource1 += (basic_resource * 0.5 * (self.status[1]['tech']+2))
-
-        self.status[0]['money'] += resource0
-        self.status[1]['money'] += resource1
-
-        self.status[0]['building'] = self.status[0]['tech'] * 60 + 100
-        self.status[1]['building'] = self.status[1]['tech'] * 60 + 100
-
+        for flag in range(2):
+            basic_resource=50
+            resource=0
+            for i in self.buildings[flag]['resource']:
+                resource += (basic_resource * 0.5 * (self.status[flag]['tech']+2))
+            self.status[flag]['money'] += resource
+            self.status[flag]['building'] = self.status[flag]['tech'] * 60 + 100
+            self.instruments[flag]['resource'].append(true)
     def next_tick(self):
         """回合演算与指令合法性判断"""
         self.attack_phase()
