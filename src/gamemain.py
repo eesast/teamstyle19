@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from .unit import *
+from unit import *
 
 
 class GameMain:
