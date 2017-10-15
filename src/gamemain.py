@@ -1,5 +1,6 @@
-from unit import *
-from unit import Age
+from .unit import *
+from .unit import Age
+import random
 
 class GameMain:
     _map_size = 200
@@ -62,7 +63,54 @@ class GameMain:
 
     def attack_phase(self):
         """Defence towers attack the units and units attack towers"""
-        pass
+        for flag in range(2):
+            tech_factor = 0.5 * (self.status[flag]['tech'] + 2)
+            for building in self.buildings[flag]['defence']:
+
+                """Bool Attack , 1/2 invalid"""
+                if building.BuildingType == BuildingType.Bool:
+                    can_attack=random.randint(0,1)
+                    if not can_attack:
+                        continue
+                    else:
+                        pre_dist = OriginalBuildingAttribute[BuildingType.Bool][BuildingAttribute.ORIGINAL_RANGE] + 1
+                        for enemy_id,enemy in self.units[1-flag].items():
+                            now_dist = abs(enemy.Position().x() - building.Position().x()) +abs(enemy.Position().y() - building.Position().y())
+                            if now_dist < pre_dist and enemy.HP() > 0:
+                                target = enemy
+                                target_id = enemy_id
+                                pre_dist=now_dist
+                        if target:
+                            target.HP( target.HP() - (OriginalBuildingAttribute[BuildingType.Bool][BuildingAttribute.ORIGINAL_ATTACK] * tech_factor))
+                            self.instruments[flag]['attack'].append((building.Unit_ID() , target_id))
+
+                """Ohm Attack , hit V and C -> attack *4"""
+                if building.BuildingType == BuildingType.Ohm:
+                    pre_dist = OriginalBuildingAttribute[BuildingType.Ohm][BuildingAttribute.ORIGINAL_RANGE] + 1
+                    for enemy_id,enemy in self.units[1-flag].items():
+                        now_dist = abs(enemy.Position().x() - building.Position().x()) + abs(enemy.Position().y() - building.Position().y())
+                        if now_dist < pre_dist and enemy.HP() > 0:
+                            target = enemy
+                            target_id = enemy_id
+                            pre_dist = now_dist
+                    if target:
+                        target_x = target.Position().x()
+                        target_y = target.Position().y()
+                        hit_v = 0
+                        hit_c = 0
+                        for enemy_id,enemy in self.units[1-flag].items():
+                            if (abs(enemy.Position().x() - target_x) + abs(enemy.Position().y() - target_y) <
+                                OriginalBuildingAttribute[BuildingType.Ohm][BuildingAttribute.AOE]):
+                                enemy.HP( enemy.HP() - (OriginalBuildingAttribute[BuildingType.Ohm][BuildingAttribute.ORIGINAL_ATTACK] * tech_factor))
+                                self.instruments[flag]['attack'].append((building.Unit_ID() , enemy_id))
+                                if enemy.Solider_Name() == SoliderName.VOLTAGE_SOURCE:
+                                    hit_v = 1
+                                if enemy.Solider_Name() == SoliderName.CURRENT_SOURCE:
+                                    hit_c = 1
+                            if hit_v and hit_c:
+                                for enemy_id, enemy in self.units[1 - flag].items():
+                                    if (abs(enemy.Position().x() - target_x) + abs(enemy.Position().y() - target_y) <OriginalBuildingAttribute[BuildingType.Ohm][BuildingAttribute.AOE]):
+                                        enemy.HP(enemy.HP() - 3 * (OriginalBuildingAttribute[BuildingType.Ohm][BuildingAttribute.ORIGINAL_ATTACK] * tech_factor))
 
     def clean_up_phase(self):
         """Remove the destroyed units and towers"""
@@ -253,19 +301,19 @@ class GameMain:
                 if self.status[flag]['money'] > consumption and self.status[flag]['tech'] < Age.AI:
                     self.status[flag]['money'] -= consumption
                     self.status[flag]['tech'] += 1
-                    self.instruments[flag]['update_age'].append(true)
+                    self.instruments[flag]['update_age'].append(True)
                 else:
-                    self.instruments[flag]['update_age'].append(false)
+                    self.instruments[flag]['update_age'].append(False)
     def resource_phase(self):
         """Produce new resource and refresh building force"""
         for flag in range(2):
-            basic_resource=50
+            basic_resource=OriginalBuildingAttribute[BuildingType.Programmer]
             resource=0
             for i in self.buildings[flag]['resource']:
                 resource += (basic_resource * 0.5 * (self.status[flag]['tech']+2))
             self.status[flag]['money'] += resource
             self.status[flag]['building'] = self.status[flag]['tech'] * 60 + 100
-            self.instruments[flag]['resource'].append(true)
+            self.instruments[flag]['resource'].append(True)
     def next_tick(self):
         """回合演算与指令合法性判断"""
         self.attack_phase()
