@@ -4,6 +4,7 @@ import struct
 import queue
 from enum import Enum
 
+
 class MsgType(Enum):
     Id = 1
     Map = 2
@@ -12,8 +13,48 @@ class MsgType(Enum):
     GameOver = 5
 
 
+class InstrType(Enum):
+    UpdateAge = 1
+    Construct = 2
+    Upgrade = 3
+    Sell = 4
+    Maintain = 5
+
+
 def dump_id(id_num):
     data = struct.pack("ii", MsgType.Id.value, id_num)
+    return data
+
+
+def dump_data(units, status):
+    data = struct.pack("i", MsgType.Data.value)
+    for flag in range(2):
+        data += struct.pack("i", status[flag]['money'])
+        data += struct.pack("i", status[flag]['tech'])
+        data += struct.pack("i", status[flag]['building'])
+    for flag in range(2):
+        for unit_id, unit in units[flag].items():
+            data += struct.pack("iiiiii", unit_id, unit.Solider_name, unit.HP, unit.Position.x, unit.Position.y,
+                                unit.Flag)
+    return data
+
+
+def dump_map(map):
+    data = struct.pack("i", MsgType.Map.value)
+    base_positions = []
+    road_positions = []
+    for i in range(len(map)):
+        for j in range(len(map[i])):
+            if map[i][j] == 2:
+                base_positions.append((i, j))
+            elif map[i][j] == 1:
+                road_positions.append((i, j))
+    data += struct.pack("i", len(base_positions))
+    for x, y in base_positions:
+        data += struct.pack("ii", x, y)
+    data += struct.pack("i", len(road_positions))
+    for x, y in road_positions:
+        data += struct.pack("ii", x, y)
     return data
 
 
@@ -115,8 +156,6 @@ def Scheduler(tasks, timeout):
     return instructions
 
 
-
-
 class MainServer:
     def __init__(self, host_address, port):
         self.clients = []
@@ -140,6 +179,7 @@ class MainServer:
         for sock in self.clients:
             sock.close()
         self.socket.close()
+
 
 def main():
     server = MainServer("127.0.0.1", 5818)
@@ -170,6 +210,7 @@ def main():
             print("Player 2 miss")
     server.send_to_players(struct.pack("i", MsgType.GameOver.value))
     server.close()
+
 
 if __name__ == "__main__":
     main()
