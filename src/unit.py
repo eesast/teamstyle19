@@ -173,6 +173,7 @@ class Building(object):
         self.__Unit_ID=unit_id
         self.__Is_Maintain=maintain
         self.level=time
+        self.__CD_left=0
 
     @property
     def HP(self):
@@ -200,6 +201,14 @@ class Building(object):
     @property
     def Is_Maintain(self):
         return self.__Is_Maintain
+
+    @property
+    def CD_left(self):
+        if self.__BuildingType is BuildingType.Programmer:
+            raise AttributeError("Programmer Building has no attribute of CD_left")
+    @CD_left.setter
+    def CD_left(self,cd_left):
+        self.__CD_left=cd_left
 
 class Solider(object):
     def __init__(self,solider_name,hp,pos,flag,unit_id):
