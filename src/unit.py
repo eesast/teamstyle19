@@ -7,6 +7,13 @@ from enum import Enum
 # ***************************The Define of Global Parameters**************************************
 Inf=9999999
 #**************************************************Enum Value ant Table******************************************
+class Command(Enum):
+    Construct=0
+    Maintain=1
+    Upgrade=2
+    Sell=3
+    Update_Age=4
+
 class UnitType(Enum):
     Base = 0
 
@@ -195,11 +202,12 @@ class Building(object):
         return self.__Is_Maintain
 
 class Solider(object):
-    def __init__(self,solider_name,hp,pos,flag):
+    def __init__(self,solider_name,hp,pos,flag,unit_id):
         self.__Solider_Name=solider_name
         self.__HP=hp
         self.__Position=pos
         self.__Flag=flag
+        self.__Unit_ID=unit_id
 
     @property
     def HP(self):
@@ -220,5 +228,9 @@ class Solider(object):
     @property
     def Flag(self):
         return self.__Flag
+
+    @property
+    def Unit_ID(self):
+        return self.__Unit_ID
 
 #***************************************************************************************************************************************************************************************************
