@@ -26,16 +26,23 @@ def dump_id(id_num):
     return data
 
 
-def dump_data(units, status):
+def dump_data(units, buildings, status):
     data = struct.pack("i", MsgType.Data.value)
     for flag in range(2):
         data += struct.pack("i", status[flag]['money'])
         data += struct.pack("i", status[flag]['tech'])
         data += struct.pack("i", status[flag]['building'])
+    typed_list = ['produce', 'defense', 'resource']
+    for flag in range(2):
+        for type in typed_list:
+            data += struct.pack("i", len(buildings[flag][type]))
+            for building in buildings[flag][type]:
+                data += struct.pack("iiiiii", building.Unit_ID, building.BuildingType, building.HP,
+                                    building.Position.x, building.Position.y, building.Is_Maintain)
     for flag in range(2):
         for unit_id, unit in units[flag].items():
-            data += struct.pack("iiiiii", unit_id, unit.Solider_name, unit.HP, unit.Position.x, unit.Position.y,
-                                unit.Flag)
+            data += struct.pack("iiiii", unit_id, unit.Solider_name, unit.HP, unit.Position.x, unit.Position.y,
+                                )
     return data
 
 
@@ -56,6 +63,10 @@ def dump_map(map):
     for x, y in road_positions:
         data += struct.pack("ii", x, y)
     return data
+
+
+def undump_instr(instructions):
+    pass
 
 
 def wait_for(seconds: float):
