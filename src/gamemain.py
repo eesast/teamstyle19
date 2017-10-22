@@ -46,10 +46,277 @@ class GameMain:
     } for i in range(2)]
 
     def init_map_random(self):
-        pass
+        import random
+
+        # 生成基地，位置定在0,0和199,199处
+        for i in range(7):
+            for j in range(7):
+                _map[i][j] = 2
+        for i in range(_map_size - 7, _map_size):
+            for j in range(_map_size - 7, _map_size):
+                _map[i][j] = 2
+
+        # 生成中路
+        i = 7
+        j = 7
+        _map[i][j] = 1
+        while (1):
+            if i < _map_size / 2 - 1 and j < _map_size / 2 - 1:
+                if random.randint(0, 1) == 0:
+                    i += 1
+                else:
+                    j += 1
+            elif i == _map_size / 2 - 1 and j < _map_size / 2 - 1:
+                j += 1
+            elif i < _map_size / 2 - 1 and j == _map_size / 2 - 1:
+                i += 1
+            else:
+                break
+            _map[i][j] = 1
+        for i in range(_map_size):
+            for j in range(_map_size):
+                if _map[_map_size - i - 1][_map_size - j - 1] == 1:
+                    _map[i][j] = 1
+        _map[int(_map_size / 2) - 1][int(_map_size / 2)] = 1  # 为了让中路连续，把最中心四格都定成路，可改
+
+        # 生成下路
+        n = random.randint(1, 3)  # 随机生成3,5或7条路
+        for a in range(n):
+            i = 7
+            x = 5  # 起点从5,3,1顺序选择
+            while _map[i][x] == 1 and x >= 1:
+                x -= 2
+            if x <= 0:
+                break
+            j = x
+            _map[i][j] = 3  # 用3标志暂定路线，最后处理
+            while 1:
+                if i + j < 200:  # 上下两部分和不同的道路使用两种不同的概率，使道路相对更分散
+                    if i < _map_size - x - 1 and j < _map_size - 8:
+                        if random.uniform(0, 1) >= x / 12:
+                            i += 1
+                            if _map[i][j - 1] != 1 and _map[i][j + 1] != 1 and _map[i + 1][
+                                j] != 1:  # 检查即将延伸的方向有没有其它路，避免交叉
+                                pass
+                            else:
+                                i -= 1
+                                j += 1
+                                if _map[i - 1][j] != 1 and _map[i + 1][j] != 1 and _map[i][j + 1] != 1:
+                                    pass
+                                else:
+                                    break
+                        else:
+                            j += 1
+                            if _map[i - 1][j] != 1 and _map[i + 1][j] != 1 and _map[i][j + 1] != 1:
+                                pass
+                            else:
+                                j -= 1
+                                i += 1
+                                if _map[i][j - 1] != 1 and _map[i][j + 1] != 1 and _map[i + 1][j] != 1:
+                                    pass
+                                else:
+                                    break
+                    _map[i][j] = 3
+                else:
+                    if i < _map_size - x - 1 and j < _map_size - 8:
+                        if random.uniform(0, 1) < x / 12:
+                            i += 1
+                            if _map[i][j - 1] != 1 and _map[i][j + 1] != 1 and _map[i + 1][
+                                j] != 1:  # 检查即将延伸的方向有没有其它路，避免交叉
+                                pass
+                            else:
+                                i -= 1
+                                j += 1
+                                if _map[i - 1][j] != 1 and _map[i + 1][j] != 1 and _map[i][j + 1] != 1:
+                                    pass
+                                else:
+                                    break
+                        else:
+                            j += 1
+                            if _map[i - 1][j] != 1 and _map[i + 1][j] != 1 and _map[i][j + 1] != 1:
+                                pass
+                            else:
+                                j -= 1
+                                i += 1
+                                if _map[i][j - 1] != 1 and _map[i][j + 1] != 1 and _map[i + 1][j] != 1:
+                                    pass
+                                else:
+                                    break
+                    elif i == _map_size - x - 1 and j < _map_size - 8:
+                        j += 1
+                        if _map[i - 1][j + 1] != 1 and _map[i][j + 1] != 1:
+                            pass
+                        else:
+                            break
+                    elif i < _map_size - x - 1 and j == _map_size - 8:
+                        i += 1
+                        if _map[i - 1][j + 1] != 1 and _map[i][j + 1] != 1:
+                            pass
+                        else:
+                            break
+                    else:
+                        break
+                    _map[i][j] = 3
+            if _map_size - 8 <= i < _map_size - 1 and j == _map_size - 8:  # 路最后延伸至另一个基地
+                for i in range(_map_size):
+                    for j in range(_map_size):
+                        if _map[i][j] == 3:
+                            _map[i][j] = 1
+            else:
+                for i in range(_map_size):
+                    for j in range(_map_size):
+                        if _map[i][j] == 3:
+                            _map[i][j] = 0
+
+        # 利用中心对称生成上路
+        for i in range(_map_size):
+            for j in range(_map_size):
+                if _map[_map_size - i - 1][_map_size - j - 1] == 1:
+                    _map[i][j] = 1
 
     def init_map_from_bitmap(self):
-        pass
+        from PIL import Image
+
+        img = Image.open(path)
+        size = (_map_size, _map_size)
+        img = img.resize(size, Image.ANTIALIAS)  # 放缩大小，直接用一个像素对应地图上的一个点
+
+        # 以下二值化代码来自搜索引擎……包括去噪过程
+        img = img.convert("RGBA")
+        pixdata = img.load()
+        for y in range(img.size[1]):
+            for x in range(img.size[0]):
+                if pixdata[x, y][0] < 90:
+                    pixdata[x, y] = (0, 0, 0, 255)
+        for y in range(img.size[1]):
+            for x in range(img.size[0]):
+                if pixdata[x, y][1] < 136:
+                    pixdata[x, y] = (0, 0, 0, 255)
+        for y in range(img.size[1]):
+            for x in range(img.size[0]):
+                if pixdata[x, y][2] > 0:
+                    pixdata[x, y] = (255, 255, 255, 255)
+
+        # 将二值化后的图片读入_map
+        for i in range(_map_size):
+            for j in range(_map_size):
+                if (pixdata[j, i] == (0, 0, 0, 255)):
+                    _map[i][j] = 1
+
+        # 个人觉得路应该是比非路少的……所以如果1多就反一下，避免底色比道路颜色深的问题
+        n = 0
+        for i in range(_map_size):
+            for j in range(_map_size):
+                if _map[i][j] == 1:
+                    n += 1
+        if n > _map_size * _map_size / 2:
+            for i in range(_map_size):
+                for j in range(_map_size):
+                    if _map[i][j] == 1:
+                        _map[i][j] = 0
+                    else:
+                        _map[i][j] = 1
+
+        # 判断基地，个人想到的一种非常麻烦的判断方法是判断四个角的7*7，全1或者全0判为基地
+        x = _map[0][0]
+        flag = 0
+        for i in range(7):  # 7*7中是不是全是1或0
+            for j in range(7):
+                if _map[i][j] == x:
+                    pass
+                else:
+                    flag = 1
+                    break
+        if flag:
+            pass
+        else:
+            for i in range(8):  # 周围一圈有没有1，即路，有路则为基地
+                if _map[i][7] == 1:
+                    flag = 1
+                    break
+            for j in range(7):
+                if _map[7][j] == 1:
+                    flag = 1
+                    break
+        if flag:  # 如果判为基地
+            for i in range(7):
+                for j in range(7):
+                    _map[i][j] = 2
+
+        x = _map[_map_size - 1][0]
+        flag = 0
+        for i in range(_map_size - 7, _map_size):
+            for j in range(7):
+                if _map[i][j] == x:
+                    pass
+                else:
+                    flag = 1
+                    break
+        if flag:
+            pass
+        else:
+            for i in range(_map_size - 8, _map_size):
+                if _map[i][7]:
+                    flag = 1
+                    break
+            for j in range(7):
+                if _map[_map_size - 8][j]:
+                    flag = 1
+                    break
+        if flag:  # 如果判为基地
+            for i in range(_map_size - 7, _map_size):
+                for j in range(7):
+                    _map[i][j] = 2
+
+        x = _map[0][_map_size - 1]
+        flag = 0
+        for i in range(7):
+            for j in range(_map_size - 7, _map_size):
+                if _map[i][j] == x:
+                    pass
+                else:
+                    flag = 1
+                    break
+        if flag:
+            pass
+        else:
+            for i in range(8):
+                if _map[i][7]:
+                    flag = 1
+                    break
+            for j in range(_map_size - 7, _map_size):
+                if _map[7][j]:
+                    flag = 1
+                    break
+        if flag:  # 如果判为基地
+            for i in range(7):
+                for j in range(_map_size - 7, _map_size):
+                    _map[i][j] = 2
+
+        x = _map[_map_size - 1][_map_size - 1]
+        flag = 0
+        for i in range(_map_size - 7, _map_size):
+            for j in range(_map_size - 7, _map_size):
+                if _map[i][j] == x:
+                    pass
+                else:
+                    flag = 1
+                    break
+        if flag:
+            pass
+        else:
+            for i in range(_map_size - 7, _map_size):
+                if _map[i][_map_size - 8]:
+                    flag = 1
+                    break
+            for j in range(_map_size - 7, _map_size):
+                if _map[_map_size - 8][j]:
+                    flag = 1
+                    break
+        if flag:  # 如果判为基地
+            for i in range(_map_size - 7, _map_size):
+                for j in range(_map_size - 7, _map_size):
+                    _map[i][j] = 2
 
     def __init__(self, init_map):
         pass
