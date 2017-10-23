@@ -26,17 +26,17 @@ def dump_id(id_num):
     return data
 
 
-def dump_data(units, buildings, status):
-    data = struct.pack("i", MsgType.Data.value)
+def dump_data(units, buildings, status, turn_num):
+    data = struct.pack("ii", MsgType.Data.value, turn_num)
     for flag in range(2):
         data += struct.pack("i", status[flag]['money'])
         data += struct.pack("i", status[flag]['tech'])
         data += struct.pack("i", status[flag]['building'])
     typed_list = ['produce', 'defense', 'resource']
     for flag in range(2):
-        for type in typed_list:
-            data += struct.pack("i", len(buildings[flag][type]))
-            for building in buildings[flag][type]:
+        for type_name in typed_list:
+            data += struct.pack("i", len(buildings[flag][type_name]))
+            for building in buildings[flag][type_name]:
                 data += struct.pack("iiiiii", building.Unit_ID, building.BuildingType, building.HP,
                                     building.Position.x, building.Position.y, building.Is_Maintain)
     for flag in range(2):
