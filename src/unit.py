@@ -158,7 +158,7 @@ class Position(object):
         return self.__y
 
 class Building(object):
-    def __init__(self,building_type,pos,flag,unit_id,maintain,time):
+    def __init__(self,building_type,pos,flag,unit_id,maintain,time,cd):
         self.__BuildingType=building_type
         self.__HP=OriginalBuildingAttribute[building_type][BuildingAttribute.ORIGINAL_HP]*(0.5+time/2)
         self.__Position=pos
@@ -166,6 +166,11 @@ class Building(object):
         self.__Unit_ID=unit_id
         self.__Is_Maintain=maintain
         self.level=time
+        self.CD=cd
+
+        #以下为仅用于BuildingType为Mole的成员
+        self.last_target_id=-1
+        self.mult_factor=1
 
     @property
     def HP(self):

@@ -1,5 +1,5 @@
-from .unit import *
-from .unit import Age
+from unit import *
+
 import random
 
 class GameMain:
@@ -330,54 +330,184 @@ class GameMain:
 
     def attack_phase(self):
         """Defence towers attack the units and units attack towers"""
+
         for flag in range(2):
             tech_factor = 0.5 * (self.status[flag]['tech'] + 2)
+
             for building in self.buildings[flag]['defence']:
 
-                """Bool Attack , 1/2 invalid"""
+                #Bool Attack , 1/2 概率无效，攻击最近单位
                 if building.BuildingType == BuildingType.Bool:
                     can_attack=random.randint(0,1)
                     if not can_attack:
                         continue
                     else:
                         pre_dist = OriginalBuildingAttribute[BuildingType.Bool][BuildingAttribute.ORIGINAL_RANGE] + 1
+                        target = None
                         for enemy_id,enemy in self.units[1-flag].items():
-                            now_dist = abs(enemy.Position().x() - building.Position().x()) +abs(enemy.Position().y() - building.Position().y())
+                            now_dist = abs(enemy.Position().x() - building.Position().x()) \
+                                       + abs(enemy.Position().y() - building.Position().y())
                             if now_dist < pre_dist and enemy.HP() > 0:
                                 target = enemy
                                 target_id = enemy_id
                                 pre_dist=now_dist
-                        if target:
-                            target.HP( target.HP() - (OriginalBuildingAttribute[BuildingType.Bool][BuildingAttribute.ORIGINAL_ATTACK] * tech_factor))
+                        if target is not None:
+                            target.HP( target.HP() - (OriginalBuildingAttribute[BuildingType.Bool]
+                                                      [BuildingAttribute.ORIGINAL_ATTACK] * tech_factor))
                             self.instruments[flag]['attack'].append((building.Unit_ID() , target_id))
 
-                """Ohm Attack , hit V and C -> attack *4"""
+                #Ohm Attack , 同时击中V和C伤害加3倍（即乘4倍），攻击最近单位
                 if building.BuildingType == BuildingType.Ohm:
-                    pre_dist = OriginalBuildingAttribute[BuildingType.Ohm][BuildingAttribute.ORIGINAL_RANGE] + 1
+                    building.CD -=1
+                    if building.CD <= 0:
+                        building.CD = OriginalBuildingAttribute[BuildingType.Ohm][BuildingAttribute.CD]
+                        pre_dist = OriginalBuildingAttribute[BuildingType.Ohm][BuildingAttribute.ORIGINAL_RANGE] + 1
+                        target = None
+                        for enemy_id,enemy in self.units[1-flag].items():
+                            now_dist = abs(enemy.Position().x() - building.Position().x()) + abs(enemy.Position().y()
+                                                                                                 - building.Position().y())
+                            if now_dist < pre_dist and enemy.HP() > 0:
+                                target = enemy
+                                target_id = enemy_id
+                                pre_dist = now_dist
+                        if target is not None:
+                            target_x = target.Position().x()
+                            target_y = target.Position().y()
+                            hit_v = 0
+                            hit_c = 0
+                            for enemy_id,enemy in self.units[1-flag].items():
+                                if (abs(enemy.Position().x() - target_x) + abs(enemy.Position().y() - target_y) <
+                                    OriginalBuildingAttribute[BuildingType.Ohm][BuildingAttribute.AOE]):
+                                    enemy.HP( enemy.HP() - (OriginalBuildingAttribute[BuildingType.Ohm]
+                                                            [BuildingAttribute.ORIGINAL_ATTACK] * tech_factor))
+                                    if enemy.Solider_Name() == SoliderName.VOLTAGE_SOURCE:
+                                        hit_v = 1
+                                    if enemy.Solider_Name() == SoliderName.CURRENT_SOURCE:
+                                        hit_c = 1
+                                if hit_v and hit_c:
+                                    for enemy_id, enemy in self.units[1 - flag].items():
+                                        if (abs(enemy.Position().x() - target_x) + abs(enemy.Position().y() - target_y)
+                                                <OriginalBuildingAttribute[BuildingType.Ohm][BuildingAttribute.AOE]):
+                                            enemy.HP(enemy.HP() - 3 * (OriginalBuildingAttribute[BuildingType.Ohm]
+                                                                       [BuildingAttribute.ORIGINAL_ATTACK] * tech_factor))
+                            self.instruments[flag]['attack'].append((building.Unit_ID(), target_id))
+                #Mole Attack，连续攻击同一个目标每次翻倍
+                if building.BuildingType == BuildingType.Mole:
+                    pre_dist = OriginalBuildingAttribute[BuildingType.Bool][BuildingAttribute.ORIGINAL_RANGE] + 1
+                    target = None
+                    find_last = False
+                    #查找上一个攻击目标是否还在攻击范围内
                     for enemy_id,enemy in self.units[1-flag].items():
-                        now_dist = abs(enemy.Position().x() - building.Position().x()) + abs(enemy.Position().y() - building.Position().y())
+                        if(enemy.HP()>0 and enemy_id == building.last_target_id and abs(enemy.Position().x()
+                            - building.Position().x()) + abs(enemy.Position().y() - building.Position().y()) < pre_dist):
+                            target=enemy
+                            building.mult_factor *= 2
+                            find_last = True
+                            break
+                    if not find_last:
+                        building.mult_factor = 1
+                        for enemy_id,enemy in self.units[1-flag].items():
+                            now_dist = abs(enemy.Position().x() - building.Position().x()) \
+                                       + abs(enemy.Position().y() - building.Position().y())
+                            if now_dist < pre_dist and enemy.HP() > 0:
+                                target = enemy
+                                target_id = enemy_id
+                                pre_dist = now_dist
+                    if target is not None:
+                        building.last_target_id= target_id
+                        target.HP( target.HP() - (OriginalBuildingAttribute[BuildingType.Mole]
+                                            [BuildingAttribute.ORIGINAL_ATTACK] * tech_factor * building.mult_factor))
+                        self.instruments[flag]['attack'].append((building.Unit_ID(), target_id))
+
+                #Monte_Carlo Attack,0-2之间随机数
+                if building.BuildingType == BuildingType.Monte_Carlo:
+                    building.CD -= 1
+                    if building.CD <= 0:
+                        building.CD = OriginalBuildingAttribute[BuildingType.Monte_Carlo][BuildingAttribute.CD]
+                        pre_dist = OriginalBuildingAttribute[BuildingType.Monte_Carlo][BuildingAttribute.ORIGINAL_RANGE] + 1
+                        target = None
+                        for enemy_id, enemy in self.units[1 - flag].items():
+                            now_dist = abs(enemy.Position().x() - building.Position().x()) \
+                                       + abs(enemy.Position().y() - building.Position().y())
+                            if now_dist < pre_dist and enemy.HP() > 0:
+                                target = enemy
+                                target_id = enemy_id
+                                pre_dist = now_dist
+                        if target is not None:
+                            rand_factor = random.uniform(0,2)
+                            target.HP(target.HP() - (OriginalBuildingAttribute[BuildingType.Bool]
+                                                     [BuildingAttribute.ORIGINAL_ATTACK] * tech_factor * rand_factor))
+                            self.instruments[flag]['attack'].append((building.Unit_ID(), target_id))
+
+                #Larry_Roberts Attack,优先数据包且对其伤害乘3
+                if building.BuildingType == BuildingType.Larry_Roberts:
+                    pre_dist = OriginalBuildingAttribute[BuildingType.Larry_Roberts][BuildingAttribute.ORIGINAL_RANGE] \
+                               + 1
+                    target = None
+                    hit_packet = False
+                    for enemy_id, enemy in self.units[1 - flag].items():
+                        now_dist = abs(enemy.Position().x() - building.Position().x()) \
+                                   + abs(enemy.Position().y() - building.Position().y())
+                        if now_dist < pre_dist and enemy.HP() > 0:
+                            if (not hit_packet) or enemy.Solider_Name == SoliderName.PACKET:
+                                target = enemy
+                                target_id = enemy_id
+                                pre_dist = now_dist
+                                if enemy.Solider_Name == SoliderName.PACKET:
+                                    hit_packet = True
+                    if target is not None:
+                        target_x = target.Position().x()
+                        target_y = target.Position().y()
+                        for enemy_id, enemy in self.units[1 - flag].items():
+                            if (abs(enemy.Position().x() - target_x) + abs(enemy.Position().y() - target_y) <
+                                    OriginalBuildingAttribute[BuildingType.Larry_Roberts][BuildingAttribute.AOE]):
+                                if enemy.Solider_Name == SoliderName.PACKET:
+                                    mult_factor = 3
+                                else:
+                                    mult_factor = 1
+                                enemy.HP(enemy.HP() - (OriginalBuildingAttribute[BuildingType.Larry_Roberts]
+                                                       [BuildingAttribute.ORIGINAL_ATTACK] * tech_factor * mult_factor))
+                        self.instruments[flag]['attack'].append((building.Unit_ID(), target_id))
+
+                #Robert_Kahn Attack,最大生命值10% * tech_factor
+                if building.BuildingType == BuildingType.Robert_Kahn:
+                    pre_dist = OriginalBuildingAttribute[BuildingType.Robert_Kahn][BuildingAttribute.ORIGINAL_RANGE] + 1
+                    target = None
+                    for enemy_id, enemy in self.units[1 - flag].items():
+                        now_dist = abs(enemy.Position().x() - building.Position().x()) \
+                                   + abs(enemy.Position().y() - building.Position().y())
                         if now_dist < pre_dist and enemy.HP() > 0:
                             target = enemy
                             target_id = enemy_id
                             pre_dist = now_dist
-                    if target:
-                        target_x = target.Position().x()
-                        target_y = target.Position().y()
-                        hit_v = 0
-                        hit_c = 0
-                        for enemy_id,enemy in self.units[1-flag].items():
-                            if (abs(enemy.Position().x() - target_x) + abs(enemy.Position().y() - target_y) <
-                                OriginalBuildingAttribute[BuildingType.Ohm][BuildingAttribute.AOE]):
-                                enemy.HP( enemy.HP() - (OriginalBuildingAttribute[BuildingType.Ohm][BuildingAttribute.ORIGINAL_ATTACK] * tech_factor))
-                                self.instruments[flag]['attack'].append((building.Unit_ID() , enemy_id))
-                                if enemy.Solider_Name() == SoliderName.VOLTAGE_SOURCE:
-                                    hit_v = 1
-                                if enemy.Solider_Name() == SoliderName.CURRENT_SOURCE:
-                                    hit_c = 1
-                            if hit_v and hit_c:
-                                for enemy_id, enemy in self.units[1 - flag].items():
-                                    if (abs(enemy.Position().x() - target_x) + abs(enemy.Position().y() - target_y) <OriginalBuildingAttribute[BuildingType.Ohm][BuildingAttribute.AOE]):
-                                        enemy.HP(enemy.HP() - 3 * (OriginalBuildingAttribute[BuildingType.Ohm][BuildingAttribute.ORIGINAL_ATTACK] * tech_factor))
+                    if target is not None:
+                        persent = 0.1 * tech_factor
+                        target.HP(target.HP() - OriginalSoliderAttribute[target.SoliderName]
+                                    [SoliderAttr.SOLIDER_ORIGINAL_HP] * persent)
+                        self.instruments[flag]['attack'].append((building.Unit_ID(), target_id))
+
+                #Hawkin Attack,秒杀一格
+                if building.BuildingType == BuildingType.Hawkin:
+                    building.CD -= 1
+                    if building.CD <= 0:
+                        building.CD = OriginalBuildingAttribute[BuildingType.Hawkin][BuildingAttribute.CD]
+                        pre_dist = OriginalBuildingAttribute[BuildingType.Hawkin][BuildingAttribute.ORIGINAL_RANGE] + 1
+                        target = None
+                        for enemy_id, enemy in self.units[1 - flag].items():
+                            now_dist = abs(enemy.Position().x() - building.Position().x()) \
+                                       + abs(enemy.Position().y() - building.Position().y())
+                            if now_dist < pre_dist and enemy.HP() > 0:
+                                target = enemy
+                                target_id = enemy_id
+                                pre_dist = now_dist
+                        if target is not None:
+                            target_x = target.Position().x()
+                            target_y = target.Position().y()
+                            for enemy_id,enemy in self.units[1-flag].items():
+                                if (abs(enemy.Position().x() - target_x) + abs(enemy.Position().y() - target_y) <
+                                    OriginalBuildingAttribute[BuildingType.Hawkin][BuildingAttribute.AOE]):
+                                    enemy.HP(-1)
+                            self.instruments[flag]['attack'].append((building.Unit_ID(), target_id))
 
     def clean_up_phase(self):
         """Remove the destroyed units and towers"""
