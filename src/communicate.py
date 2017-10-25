@@ -22,11 +22,13 @@ class InstrType(Enum):
 
 
 def dump_id(id_num):
+    """dump the info for the player id"""
     data = struct.pack("ii", MsgType.Id.value, id_num)
     return data
 
 
 def dump_data(units, buildings, status, turn_num):
+    """dump the data to send at every turn"""
     data = struct.pack("ii", MsgType.Data.value, turn_num)
     for flag in range(2):
         data += struct.pack("i", status[flag]['money'])
@@ -47,6 +49,8 @@ def dump_data(units, buildings, status, turn_num):
 
 
 def dump_map(map):
+    """dump the map info"""
+    # 数据顺序为基地位置数+基地位置+道路位置数+道路位置
     data = struct.pack("i", MsgType.Map.value)
     base_positions = []
     road_positions = []
@@ -70,6 +74,7 @@ def undump_instr(instructions):
 
 
 def wait_for(seconds: float):
+    """wait for given seconds and stop"""
     start_time = time.clock()
     while ((time.clock() - start_time) < seconds):
         yield
@@ -141,7 +146,7 @@ class Task:
         self.target.close()
 
 
-def Scheduler(tasks, timeout):
+def Scheduler(tasks: list, timeout):
     ready = queue.Queue()
     for task in tasks:
         ready.put(task)
@@ -168,25 +173,30 @@ def Scheduler(tasks, timeout):
 
 
 class MainServer:
-    def __init__(self, host_address, port):
+    def __init__(self, host_address: str, port: int):
         self.clients = []
         self.socket = socket.socket()
         self.socket.settimeout(0)
         self.socket.bind((host_address, port))
 
     def wait_for_connection(self):
+        """wait for two clients to connect"""
         self.clients = Scheduler([Task(wait_for_connection(self.socket, 2))], timeout=None)[0]
 
-    def send_to_players(self, data):
+    def send_to_players(self, data: bytes):
+        """send the data to two clients"""
         Scheduler([Task(sendall(sock, data)) for sock in self.clients], wait_for(0.1))
 
     def recv_instructions(self):
+        """receive the instructions from two clients, return in at most 1 second"""
         return Scheduler([Task(receive(sock)) for sock in self.clients], wait_for(0.1))
 
-    def send_to_player(self, data, aim_id):
+    def send_to_player(self, data: bytes, aim_id: int):
+        """send the data to one client"""
         Scheduler([Task(sendall(self.clients[aim_id], data))], wait_for(0.1))
 
     def close(self):
+        """close the server and disconnect"""
         for sock in self.clients:
             sock.close()
         self.socket.close()
