@@ -5,7 +5,7 @@
 
 //definition of enumeration
 enum UnitType {
-    Base, 
+    Base,
 
     PRODUCTION_BUILDING,
     DEFENSIVE_BUILDING,
@@ -150,7 +150,7 @@ struct Resource {
 
     int resource_1;
     int resource_2;
-    Resource(int building_point_1=0, int building_point_2=0, int resource_1=0, int resource_2=0): 
+    Resource(int building_point_1=0, int building_point_2=0, int resource_1=0, int resource_2=0):
         building_point_1(building_point_1), building_point_2(building_point_2), resource_1(resource_1), resource_2(resource_2) {}
 };
 
