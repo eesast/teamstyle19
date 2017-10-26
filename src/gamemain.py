@@ -536,7 +536,7 @@ class GameMain:
     def move_phase(self):
         """Move the units according to their behaviour mode"""
         _map = self._map
-        for current_flag in range(2): 
+        for current_flag in range(2):
             # Assume player 0's base is at(0,0) temporarily, which can be changed.
             direction = 1 if current_flag == 0 else -1
             can_move = True
@@ -546,15 +546,15 @@ class GameMain:
                 if unit.Solider_Name == SoliderName.TURNING_MACHINE or SoliderName.ULTRON:
                     for enemy_building in self.buildings[not current_flag]['defence']:
                         if (enemy_building.BuildingType == BuildingType.Musk and
-                            abs(enemy_building.Position.x - unit.Position.x) + 
-                            abs(enemy_building.Position.y - unit.Position.y) <= 
+                            abs(enemy_building.Position.x - unit.Position.x) +
+                            abs(enemy_building.Position.y - unit.Position.y) <=
                             OriginalBuildingAttribute[enemy_building.BuildingType][BuildingAttribute.ORIGINAL_RANGE]) :
                             can_move = False
                             break
                     if not can_move:
                         continue
 
-                if (OriginalSoliderAttribute[unit.Solider_Name][SoliderAttr.ACTION_MODE] == 
+                if (OriginalSoliderAttribute[unit.Solider_Name][SoliderAttr.ACTION_MODE] ==
                     ActionMode.BUILDING_ATTACK):
                     for i in range(OriginalSoliderAttribute[unit.Solider_Name][SoliderAttr.SPEED]) :
                         # When solider is moving, if there are buildings in solider's shot range,
@@ -562,8 +562,8 @@ class GameMain:
                         for building_type, building_array in self.buildings[not current_flag].items():
                             for element in building_array:
                                 enemy_building = element[0]
-                                if (abs(enemy_building.Position.x - unit.Position.x) + 
-                                    abs(enemy_building.Position.y - unit.Position.y) <= 
+                                if (abs(enemy_building.Position.x - unit.Position.x) +
+                                    abs(enemy_building.Position.y - unit.Position.y) <=
                                     OriginalSoliderAttribute[unit.Solider_Name][SoliderAttr.ATTACK_RANGE]) :
                                     can_move = False
                                     break
@@ -582,7 +582,7 @@ class GameMain:
                             break
 
                 else:
-                    for i in range(OriginalSoliderAttribute[unit.Solider_Name][SoliderAttr.SPEED]) :                        
+                    for i in range(OriginalSoliderAttribute[unit.Solider_Name][SoliderAttr.SPEED]) :
                         if _map[unit.Position.x + direction][unit.Position.y] == 1:
                             self.units[current_flag][unit_id].Position.x += direction
                         elif _map[unit.Position.x][unit.Position.y + direction] == 1:
@@ -611,7 +611,7 @@ class GameMain:
                     produce_pos = Position(*construct_instrument[2])
 
                     # Ignore the instruments that spend too much.
-                    if (self.status[current_flag]['money'] < money_cost and 
+                    if (self.status[current_flag]['money'] < money_cost and
                         self.status[current_flag]['building'] < building_point_cost) :
                         continue
 
@@ -639,7 +639,7 @@ class GameMain:
                     self.instruments[current_flag]['construct'].append(construct_instrument)
 
         def maintain_phase(self):
-            for current_flag in range(2):               
+            for current_flag in range(2):
                 for building_type, building_array in self.buildings[current_flag].items():
                     for element in building_array:
                         building = element[0]
@@ -652,10 +652,10 @@ class GameMain:
                                     not self.buildings[current_flag][building_type][building_index][0].Is_Maintain
                                 self.instruments[current_flag]['maintain'].append(maintain_instrument)
                                 break
-                            
+
                         # Maintain the buildings.
-                        max_HP = (OriginalBuildingAttribute[building.BuildingType][BuildingAttribute.ORIGINAL_HP] * 
-                                  0.5 * (building.level + 2)) 
+                        max_HP = (OriginalBuildingAttribute[building.BuildingType][BuildingAttribute.ORIGINAL_HP] *
+                                  0.5 * (building.level + 2))
                         lost_percent = (max_HP - building.HP) / max_HP # The ratio of lost HP to max HP.
                         construct_money = (OriginalBuildingAttribute[building.BuildingType][BuildingAttribute.ORIGINAL_RESOURCE] *
                                            0.5 * (building.level + 2))
@@ -663,17 +663,17 @@ class GameMain:
                             self.status['money'] > lost_percent * construct_money) :
                             self.buildings[current_flag][building_type][building_index][0].HP = max_HP
                             self.status['money'] -= lost_percent * construct_money
-                
+
         def upgrade_phase(self):
-            for current_flag in range(2):               
+            for current_flag in range(2):
                 for building_type, building_array in self.buildings[current_flag].items():
                     for element in building_array:
                         building = element[0]
                         for upgrade_instrument in self.raw_instruments[current_flag]['upgrade']:
                             if building.Unit_ID == upgrade_instrument:
                                 building_index = building_array.index(element)
-                                max_HP = (OriginalBuildingAttribute[building.BuildingType][BuildingAttribute.ORIGINAL_HP] * 
-                                          0.5 * (building.level + 2)) 
+                                max_HP = (OriginalBuildingAttribute[building.BuildingType][BuildingAttribute.ORIGINAL_HP] *
+                                          0.5 * (building.level + 2))
                                 lost_percent = (max_HP - building.HP) / max_HP # The ratio of lost HP to max HP.
                                 construct_money = (OriginalBuildingAttribute[building.BuildingType][BuildingAttribute.ORIGINAL_RESOURCE] *
                                                    0.5 * (building.level + 2))
@@ -697,14 +697,14 @@ class GameMain:
                         for element in building_array:
                             building = element[0]
                             if building.Unit_ID == sell_instrument:
-                                max_HP = (OriginalBuildingAttribute[building.BuildingType][BuildingAttribute.ORIGINAL_HP] * 
-                                          0.5 * (building.level + 2)) 
-                                return_percent = 0.5 if building.HP < 0.5 * max_HP else 1 - building.HP / max_HP 
+                                max_HP = (OriginalBuildingAttribute[building.BuildingType][BuildingAttribute.ORIGINAL_HP] *
+                                          0.5 * (building.level + 2))
+                                return_percent = 0.5 if building.HP < 0.5 * max_HP else 1 - building.HP / max_HP
                                 construct_money = (OriginalBuildingAttribute[building.BuildingType][BuildingAttribute.ORIGINAL_RESOURCE] *
                                                    0.5 * (building.level + 2))
 
                                 self.status['money'] += return_percent * construct_money
-                                self.buildings[current_flag][building_type].remove(building) 
+                                self.buildings[current_flag][building_type].remove(building)
                                 have_found = True
                                 break
                         if have_found:
@@ -720,7 +720,7 @@ class GameMain:
         basic_consumption = 0  #基础升级科技消耗，未定
         increased_consumption = 0   #科技每升一级，下次升级科技资源消耗增量
         for flag in range(2):
-           if self.raw_instruments[flag]['update_age']:
+            if self.raw_instruments[flag]['update_age']:
                 consumption = basic_consumption + increased_consumption*self.status[flag]['tech']
                 if self.status[flag]['money'] > consumption and self.status[flag]['tech'] < Age.AI.value:
                     self.status[flag]['money'] -= consumption
