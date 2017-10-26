@@ -4,7 +4,9 @@ import random
 
 class GameMain:
     _map_size = 200
-    _map = [[0 for j in range(_map_size)] for i in range(_map_size)]
+    _map = []
+    for i in range(_map_size):
+        _map.append([0 for j in range(_map_size)])
     turn_num = 0
     winner = 3
     total_id = 0
@@ -323,7 +325,7 @@ class GameMain:
                 for j in range(_map_size - 7, _map_size):
                     _map[i][j] = 2
 
-    def __init__(self, init_map):
+    def __init__(self):
         pass
 
     def judge_winnner(self):
@@ -631,3 +633,11 @@ class GameMain:
         self.resource_phase()
         # self.update_id()
         self.judge_winnner()
+
+
+def main():
+    game = GameMain()
+
+
+if __name__ == "__main__":
+    main()
