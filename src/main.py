@@ -33,7 +33,7 @@ def SoliderName2Str(std):
 
 ############################################################################
 
-filename = "teamstyle19" + time.strftime("%m%d%H%M%S") + ".txt"  # 将来改成rpy
+filename = "ts19" + time.strftime("%m%d%H%M%S") + ".txt"  # 将来改成rpy
 if len(sys.argv) > 1:
     filename = sys.argv[1]
 
@@ -52,7 +52,7 @@ while game.winner == 3:
         print("read to the end of file")
         break
 
-        # 由于通信模块未写，直接将每回合信息写入文件，方便之后调试
+    # 由于通信模块未写，直接将每回合信息写入文件，方便之后调试
     file.append(json.dumps({'turn': game.turn_num}))
     file.append(json.dumps(game.buildings, default=building2dict))
     file.append(json.dumps(game.units, default=unit2dict))
@@ -62,8 +62,6 @@ while game.winner == 3:
     print("server turns:", game.turn_num)
     game.next_tick()
 
-f = open(filename, 'w')
-for b in file:
-    f.write(b)
-f.write(str(game.winner))
-f.close()
+with open(filename, 'w') as f:
+    f.writelines(file)
+    f.write(str(game.winner))

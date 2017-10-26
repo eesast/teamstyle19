@@ -750,7 +750,7 @@ class GameMain:
     def resource_phase(self):
         """Produce new resource and refresh building force"""
         for flag in range(2):
-            basic_resource = OriginalBuildingAttribute[BuildingType.Programmer]
+            basic_resource = OriginalBuildingAttribute[BuildingType.Programmer][BuildingAttribute.ORIGINAL_ATTACK]
             resource = (basic_resource * 0.5 * (self.status[flag]['tech'] + 2)) * len(self.buildings[flag]['resource'])
             self.status[flag]['money'] += resource
             self.status[flag]['building'] = self.status[flag]['tech'] * 60 + 100
