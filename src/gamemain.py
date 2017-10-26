@@ -511,7 +511,19 @@ class GameMain:
 
     def clean_up_phase(self):
         """Remove the destroyed units and towers"""
-        pass
+        for flag in range(2):
+            for unit_id,unit in self.units[flag].items():
+                if unit.HP() <= 0:
+                    self.units[flag].pop(unit_id)
+            for building in self.buildings[flag]['produce']:
+                if building.HP() <=0:
+                    self.buildings[flag]['produce'].remove(building)
+            for building in self.buildings[flag]['defense']:
+                if building.HP() <=0:
+                    self.buildings[flag]['defense'].remove(building)
+            for building in self.buildings[flag]['resource']:
+                if building.HP() <=0:
+                    self.buildings[flag]['resource'].remove(building)
 
     def move_phase(self):
         """Move the units according to their behaviour mode"""
