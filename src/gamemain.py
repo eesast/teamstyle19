@@ -334,11 +334,65 @@ class GameMain:
         pass
 
     def judge_winnner(self):
-        pass
+        if self.turn_num == Inf:
+            if self.main_base[0].HP > self.main_base[1].HP:
+                self.winner = 1
+            elif self.main_base[0].HP < self.main_base[1].HP:
+                self.winner = 2
+            elif self.status[0]['tech'] > self.status[1]['tech']:
+                self.winner = 1
+            elif self.status[0]['tech'] < self.status[1]['tech']:
+                self.winner = 2
+            elif len(self.units[0]) > len(self.units[1]):
+                self.winner = 1
+            elif len(self.units[0]) < len(self.units[1]):
+                self.winner = 2
+            elif self.status[0]['money'] > self.status[1]['money']:
+                self.winner = 1
+            elif self.status[0]['money'] < self.status[1]['money']:
+                self.winner = 2
+            else:
+                self.winner = 3
+            '''兵力比较，实在不知道怎么对现存兵力进行统计……能想到的方法都极其麻烦，感觉不太可能发生，故略过'''
+        elif self.main_base[0].blood == 0 and self.main_base[1].blood != 0:
+            self.winner = 1
+        elif self.main_base[1].blood == 0 and self.main_base[0].blood != 0:
+            self.winner = 2
+        else:
+            self.winner = 3
 
+    '''去重，raw_instruments从移动到instruments中'''
     def check_legal(self):
-        """Remove the repeated instruments, or instruments on the wrong units"""
-        pass
+        for current_flag in range(2):
+                for key in self.raw_instruments[current_flag]:
+                    '''部分遍历怎么写？排除'update_age'这个键'''
+                    for value in self.raw_instruments[current_flag][key]:
+                        self.instruments[current_flag][key].append(value)
+                        if key == 'construct':
+                            new_unit = self.units[current_flag][value]  # 新建筑
+                            build_range = 2  # 已有建筑周围（？）格,此处?=2
+                            if new_unit.Position.x in range(7) or new_unit.Position.y in range(7):
+                                self.instruments[current_flag][key].remove(value)
+                            if _map[new_unit.Position.x][new_unit.Position.y] == 1:
+                                self.instruments[current_flag][key].remove(value)
+                            for old_buildings in self.units[current_flag]:
+                                if abs(new_unit.Position.x - old_buildings.Position.x) < build_range and \
+                                                abs(new_unit.Position.y - old_buildings.Position.y) < build_range:
+                                    self.instruments[current_flag][key].remove(value)
+                                    break
+                            '''钱不够的情况在construct_phase函数里已经写了'''
+
+                        if key == 'upgrade':
+                            '''钱不够和已经到达最高级的情况在upgrade_phase函数里已经写了'''
+                            pass
+
+                        if key == 'sell':
+                            '''去重之后，应该就不会出现卖空的情况。'''
+                            pass
+
+                        if key == 'update_age':
+                            '''钱不够和已经到达最高级的情况在update_phase函数里已经写了'''
+                            pass
 
     def attack_phase(self):
         """Defence towers attack the units and units attack towers"""
