@@ -7,6 +7,13 @@ from enum import Enum
 # ***************************The Define of Global Parameters**************************************
 Inf=9999999
 #**************************************************Enum Value ant Table******************************************
+class Command(Enum):
+    Construct=0
+    Maintain=1
+    Upgrade=2
+    Sell=3
+    Update_Age=4
+
 class UnitType(Enum):
     Base = 0
 
@@ -166,8 +173,7 @@ class Building(object):
         self.__Unit_ID=unit_id
         self.__Is_Maintain=maintain
         self.level=time
-        self.CD=cd
-
+        self.__CD_left=0
         #以下为仅用于BuildingType为Mole的成员
         self.last_target_id=-1
         self.mult_factor=1
@@ -199,12 +205,21 @@ class Building(object):
     def Is_Maintain(self):
         return self.__Is_Maintain
 
+    @property
+    def CD_left(self):
+        if self.__BuildingType is BuildingType.Programmer:
+            raise AttributeError("Programmer Building has no attribute of CD_left")
+    @CD_left.setter
+    def CD_left(self,cd_left):
+        self.__CD_left=cd_left
+
 class Solider(object):
-    def __init__(self,solider_name,hp,pos,flag):
+    def __init__(self,solider_name,hp,pos,flag,unit_id):
         self.__Solider_Name=solider_name
         self.__HP=hp
         self.__Position=pos
         self.__Flag=flag
+        self.__Unit_ID=unit_id
 
     @property
     def HP(self):
@@ -225,5 +240,9 @@ class Solider(object):
     @property
     def Flag(self):
         return self.__Flag
+
+    @property
+    def Unit_ID(self):
+        return self.__Unit_ID
 
 #***************************************************************************************************************************************************************************************************
