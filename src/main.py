@@ -24,7 +24,6 @@ def SoliderName2Str(std):
 	return str(std)
 ############################################################################
 
-
 filename = "teamstyle19" + time.strftime("%m%d%H%M%S") + ".txt" #将来改成rpy
 if (len(sys.argv)>1):
     filename = sys.argv[1]
@@ -36,12 +35,15 @@ file = []
 
 
 while( game.winner == 3 ):
-	#由于未写通信模块，故每回合指令手动输入
+	#由于未写通信模块，故每回合指令写入txt中，随后自动逐行读取
 
 
-	#将指令写入txt文件中，逐行读取
-	raw_instrument = json.load(read_file.readline())
-	game.raw_instruments = raw_instrument
+	line = read_file.readline()
+	if line:
+		game.raw_instruments = json.loads(line)
+	else :
+		print("read to the end of file")
+		break
 
 	#由于通信模块未写，直接将每回合信息写入文件，方便之后调试
 	file.append( json.dumps({'turn': game.turn_num }) )
