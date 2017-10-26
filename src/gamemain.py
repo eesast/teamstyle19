@@ -4,9 +4,12 @@ import random
 
 class GameMain:
     _map_size = 200
-    _map = [[[0] for i in range(_map_size)] for i in range(_map_size)]
+    _map = []
+    for i in range(_map_size):
+        _map.append([0 for j in range(_map_size)])
     turn_num = 0
     winner = 3
+    total_id = 0
 
     units = [{} for i in range(2)]
 
@@ -47,6 +50,8 @@ class GameMain:
 
     def init_map_random(self):
         import random
+        _map = self._map
+        _map_size = self._map_size
 
         # 生成基地，位置定在0,0和199,199处
         for i in range(7):
@@ -174,8 +179,11 @@ class GameMain:
                 if _map[_map_size - i - 1][_map_size - j - 1] == 1:
                     _map[i][j] = 1
 
-    def init_map_from_bitmap(self):
+    def init_map_from_bitmap(self, path):
         from PIL import Image
+
+        _map_size = self._map_size
+        _map = self._map
 
         img = Image.open(path)
         size = (_map_size, _map_size)
@@ -318,7 +326,7 @@ class GameMain:
                 for j in range(_map_size - 7, _map_size):
                     _map[i][j] = 2
 
-    def __init__(self, init_map):
+    def __init__(self):
         pass
 
     def judge_winnner(self):
@@ -518,15 +526,16 @@ class GameMain:
             for building in self.buildings[flag]['produce']:
                 if building.HP() <=0:
                     self.buildings[flag]['produce'].remove(building)
-            for building in self.buildings[flag]['defense']:
+            for building in self.buildings[flag]['defence']:
                 if building.HP() <=0:
-                    self.buildings[flag]['defense'].remove(building)
+                    self.buildings[flag]['defence'].remove(building)
             for building in self.buildings[flag]['resource']:
                 if building.HP() <=0:
                     self.buildings[flag]['resource'].remove(building)
 
     def move_phase(self):
         """Move the units according to their behaviour mode"""
+        _map = self._map
         for current_flag in range(2): 
             # Assume player 0's base is at(0,0) temporarily, which can be changed.
             direction = 1 if current_flag == 0 else -1
@@ -567,7 +576,8 @@ class GameMain:
                                 self.units[current_flag][unit_id].Position.x += direction
                             elif _map[unit.Position.x][unit.Position.y + direction] == 1:
                                 self.units[current_flag][unit_id].Position.y += direction
-                            self.instruments[current_flag]['move'].append((unit_id, self.units[unit_id].Position))
+                            self.instruments[current_flag]['move'].append(
+                                (unit_id, self.units[current_flag][unit_id].Position))
                         else:
                             break
 
@@ -577,7 +587,8 @@ class GameMain:
                             self.units[current_flag][unit_id].Position.x += direction
                         elif _map[unit.Position.x][unit.Position.y + direction] == 1:
                             self.units[current_flag][unit_id].Position.y += direction
-                        self.instruments[current_flag]['move'].append((unit_id, self.units[unit_id].Position))
+                        self.instruments[current_flag]['move'].append(
+                            (unit_id, self.units[current_flag][unit_id].Position))
 
     def building_phase(self):
         """Deal with the instruments about buildings"""
@@ -585,18 +596,19 @@ class GameMain:
         # Lack the legality judgement temporarily.
 
         def construct_phase(self):
-            age_increase_factor = 0.5 * (self.status[current_flag]['tech'] + 2)
-            for current_flag in range(2):               
+            total_id = self.total_id
+            for current_flag in range(2):
+                age_increase_factor = 0.5 * (self.status[current_flag]['tech'] + 2)
                 for construct_instrument in self.raw_instruments[current_flag]['construct']:
                     building_name = construct_instrument[0]
                     building_hp = (OriginalBuildingAttribute[construct_instrument[0]][BuildingAttribute.ORIGINAL_HP] *
                                    age_increase_factor)
-                    building_pos = Position(construct_instrument[1])
+                    building_pos = Position(*construct_instrument[1])
                     money_cost = (OriginalBuildingAttribute[construct_instrument[0]][BuildingAttribute.ORIGINAL_RESOURCE] *
                                   age_increase_factor)
                     building_point_cost = (OriginalBuildingAttribute[construct_instrument[0]][BuildingAttribute.ORIGINAL_BUILDING_POINT] *
                                            age_increase_factor)
-                    produce_pos = Position(construct_instrument[2])
+                    produce_pos = Position(*construct_instrument[2])
 
                     # Ignore the instruments that spend too much.
                     if (self.status[current_flag]['money'] < money_cost and 
@@ -606,16 +618,19 @@ class GameMain:
                     if (OriginalBuildingAttribute[construct_instrument[0]][BuildingAttribute.BUILDING_TYPE] ==
                         UnitType.PRODUCTION_BUILDING) :
                         self.buildings[current_flag]['produce'].append((
-                            Building(building_name, building_hp, building_pos, current_flag, total_id, False),
+                            Building(building_name, building_pos, current_flag, total_id, False,
+                                     self.status[current_flag]['tech']),
                             produce_pos))
                     elif (OriginalBuildingAttribute[construct_instrument[0]][BuildingAttribute.BUILDING_TYPE] ==
                           UnitType.DEFENSIVE_BUILDING) :
                         self.buildings[current_flag]['defence'].append((
-                            Building(building_name, building_hp, building_pos, current_flag, total_id, False),
+                            Building(building_name, building_pos, current_flag, total_id, False,
+                                     self.status[current_flag]['tech']),
                             produce_pos))
                     else:
                         self.buildings[current_flag]['resource'].append((
-                            Building(building_name, building_hp, building_pos, current_flag, total_id, False),
+                            Building(building_name, building_pos, current_flag, total_id, False,
+                                     self.status[current_flag]['tech']),
                             produce_pos))
 
                     total_id += 1
@@ -674,7 +689,7 @@ class GameMain:
                                     self.instruments[current_flag]['upgrade'].append(upgrade_instrument)
 
         def sell_phase(self):
-            age_increase_factor = 0.5 * (self.status[current_flag]['tech'] + 2)
+            # age_increase_factor = 0.5 * (self.status[current_flag]['tech'] + 2)
             for current_flag in range(2):
                 for sell_instrument in self.raw_instruments[current_flag]['sell']:
                     have_found = False # Signal if the building to be sold has been found.
@@ -707,7 +722,7 @@ class GameMain:
         for flag in range(2):
            if self.raw_instruments[flag]['update_age']:
                 consumption = basic_consumption + increased_consumption*self.status[flag]['tech']
-                if self.status[flag]['money'] > consumption and self.status[flag]['tech'] < Age.AI:
+                if self.status[flag]['money'] > consumption and self.status[flag]['tech'] < Age.AI.value:
                     self.status[flag]['money'] -= consumption
                     self.status[flag]['tech'] += 1
                     self.instruments[flag]['update_age'].append(True)
@@ -722,7 +737,7 @@ class GameMain:
                 resource += (basic_resource * 0.5 * (self.status[flag]['tech']+2))
             self.status[flag]['money'] += resource
             self.status[flag]['building'] = self.status[flag]['tech'] * 60 + 100
-            self.instruments[flag]['resource'].append(True)
+            self.instruments[flag]['resource'] = True
     def next_tick(self):
         """回合演算与指令合法性判断"""
         self.attack_phase()
@@ -737,3 +752,12 @@ class GameMain:
         self.resource_phase()
         # self.update_id()
         self.judge_winnner()
+
+
+def main():
+    game = GameMain()
+    game.next_tick()
+
+
+if __name__ == "__main__":
+    main()
