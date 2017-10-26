@@ -1,5 +1,6 @@
 from unit import *
-from unit import Age
+
+import random
 
 class GameMain:
     _map_size = 200
@@ -45,10 +46,277 @@ class GameMain:
     } for i in range(2)]
 
     def init_map_random(self):
-        pass
+        import random
+
+        # 生成基地，位置定在0,0和199,199处
+        for i in range(7):
+            for j in range(7):
+                _map[i][j] = 2
+        for i in range(_map_size - 7, _map_size):
+            for j in range(_map_size - 7, _map_size):
+                _map[i][j] = 2
+
+        # 生成中路
+        i = 7
+        j = 7
+        _map[i][j] = 1
+        while (1):
+            if i < _map_size / 2 - 1 and j < _map_size / 2 - 1:
+                if random.randint(0, 1) == 0:
+                    i += 1
+                else:
+                    j += 1
+            elif i == _map_size / 2 - 1 and j < _map_size / 2 - 1:
+                j += 1
+            elif i < _map_size / 2 - 1 and j == _map_size / 2 - 1:
+                i += 1
+            else:
+                break
+            _map[i][j] = 1
+        for i in range(_map_size):
+            for j in range(_map_size):
+                if _map[_map_size - i - 1][_map_size - j - 1] == 1:
+                    _map[i][j] = 1
+        _map[int(_map_size / 2) - 1][int(_map_size / 2)] = 1  # 为了让中路连续，把最中心四格都定成路，可改
+
+        # 生成下路
+        n = random.randint(1, 3)  # 随机生成3,5或7条路
+        for a in range(n):
+            i = 7
+            x = 5  # 起点从5,3,1顺序选择
+            while _map[i][x] == 1 and x >= 1:
+                x -= 2
+            if x <= 0:
+                break
+            j = x
+            _map[i][j] = 3  # 用3标志暂定路线，最后处理
+            while 1:
+                if i + j < 200:  # 上下两部分和不同的道路使用两种不同的概率，使道路相对更分散
+                    if i < _map_size - x - 1 and j < _map_size - 8:
+                        if random.uniform(0, 1) >= x / 12:
+                            i += 1
+                            if _map[i][j - 1] != 1 and _map[i][j + 1] != 1 and _map[i + 1][
+                                j] != 1:  # 检查即将延伸的方向有没有其它路，避免交叉
+                                pass
+                            else:
+                                i -= 1
+                                j += 1
+                                if _map[i - 1][j] != 1 and _map[i + 1][j] != 1 and _map[i][j + 1] != 1:
+                                    pass
+                                else:
+                                    break
+                        else:
+                            j += 1
+                            if _map[i - 1][j] != 1 and _map[i + 1][j] != 1 and _map[i][j + 1] != 1:
+                                pass
+                            else:
+                                j -= 1
+                                i += 1
+                                if _map[i][j - 1] != 1 and _map[i][j + 1] != 1 and _map[i + 1][j] != 1:
+                                    pass
+                                else:
+                                    break
+                    _map[i][j] = 3
+                else:
+                    if i < _map_size - x - 1 and j < _map_size - 8:
+                        if random.uniform(0, 1) < x / 12:
+                            i += 1
+                            if _map[i][j - 1] != 1 and _map[i][j + 1] != 1 and _map[i + 1][
+                                j] != 1:  # 检查即将延伸的方向有没有其它路，避免交叉
+                                pass
+                            else:
+                                i -= 1
+                                j += 1
+                                if _map[i - 1][j] != 1 and _map[i + 1][j] != 1 and _map[i][j + 1] != 1:
+                                    pass
+                                else:
+                                    break
+                        else:
+                            j += 1
+                            if _map[i - 1][j] != 1 and _map[i + 1][j] != 1 and _map[i][j + 1] != 1:
+                                pass
+                            else:
+                                j -= 1
+                                i += 1
+                                if _map[i][j - 1] != 1 and _map[i][j + 1] != 1 and _map[i + 1][j] != 1:
+                                    pass
+                                else:
+                                    break
+                    elif i == _map_size - x - 1 and j < _map_size - 8:
+                        j += 1
+                        if _map[i - 1][j + 1] != 1 and _map[i][j + 1] != 1:
+                            pass
+                        else:
+                            break
+                    elif i < _map_size - x - 1 and j == _map_size - 8:
+                        i += 1
+                        if _map[i - 1][j + 1] != 1 and _map[i][j + 1] != 1:
+                            pass
+                        else:
+                            break
+                    else:
+                        break
+                    _map[i][j] = 3
+            if _map_size - 8 <= i < _map_size - 1 and j == _map_size - 8:  # 路最后延伸至另一个基地
+                for i in range(_map_size):
+                    for j in range(_map_size):
+                        if _map[i][j] == 3:
+                            _map[i][j] = 1
+            else:
+                for i in range(_map_size):
+                    for j in range(_map_size):
+                        if _map[i][j] == 3:
+                            _map[i][j] = 0
+
+        # 利用中心对称生成上路
+        for i in range(_map_size):
+            for j in range(_map_size):
+                if _map[_map_size - i - 1][_map_size - j - 1] == 1:
+                    _map[i][j] = 1
 
     def init_map_from_bitmap(self):
-        pass
+        from PIL import Image
+
+        img = Image.open(path)
+        size = (_map_size, _map_size)
+        img = img.resize(size, Image.ANTIALIAS)  # 放缩大小，直接用一个像素对应地图上的一个点
+
+        # 以下二值化代码来自搜索引擎……包括去噪过程
+        img = img.convert("RGBA")
+        pixdata = img.load()
+        for y in range(img.size[1]):
+            for x in range(img.size[0]):
+                if pixdata[x, y][0] < 90:
+                    pixdata[x, y] = (0, 0, 0, 255)
+        for y in range(img.size[1]):
+            for x in range(img.size[0]):
+                if pixdata[x, y][1] < 136:
+                    pixdata[x, y] = (0, 0, 0, 255)
+        for y in range(img.size[1]):
+            for x in range(img.size[0]):
+                if pixdata[x, y][2] > 0:
+                    pixdata[x, y] = (255, 255, 255, 255)
+
+        # 将二值化后的图片读入_map
+        for i in range(_map_size):
+            for j in range(_map_size):
+                if (pixdata[j, i] == (0, 0, 0, 255)):
+                    _map[i][j] = 1
+
+        # 个人觉得路应该是比非路少的……所以如果1多就反一下，避免底色比道路颜色深的问题
+        n = 0
+        for i in range(_map_size):
+            for j in range(_map_size):
+                if _map[i][j] == 1:
+                    n += 1
+        if n > _map_size * _map_size / 2:
+            for i in range(_map_size):
+                for j in range(_map_size):
+                    if _map[i][j] == 1:
+                        _map[i][j] = 0
+                    else:
+                        _map[i][j] = 1
+
+        # 判断基地，个人想到的一种非常麻烦的判断方法是判断四个角的7*7，全1或者全0判为基地
+        x = _map[0][0]
+        flag = 0
+        for i in range(7):  # 7*7中是不是全是1或0
+            for j in range(7):
+                if _map[i][j] == x:
+                    pass
+                else:
+                    flag = 1
+                    break
+        if flag:
+            pass
+        else:
+            for i in range(8):  # 周围一圈有没有1，即路，有路则为基地
+                if _map[i][7] == 1:
+                    flag = 1
+                    break
+            for j in range(7):
+                if _map[7][j] == 1:
+                    flag = 1
+                    break
+        if flag:  # 如果判为基地
+            for i in range(7):
+                for j in range(7):
+                    _map[i][j] = 2
+
+        x = _map[_map_size - 1][0]
+        flag = 0
+        for i in range(_map_size - 7, _map_size):
+            for j in range(7):
+                if _map[i][j] == x:
+                    pass
+                else:
+                    flag = 1
+                    break
+        if flag:
+            pass
+        else:
+            for i in range(_map_size - 8, _map_size):
+                if _map[i][7]:
+                    flag = 1
+                    break
+            for j in range(7):
+                if _map[_map_size - 8][j]:
+                    flag = 1
+                    break
+        if flag:  # 如果判为基地
+            for i in range(_map_size - 7, _map_size):
+                for j in range(7):
+                    _map[i][j] = 2
+
+        x = _map[0][_map_size - 1]
+        flag = 0
+        for i in range(7):
+            for j in range(_map_size - 7, _map_size):
+                if _map[i][j] == x:
+                    pass
+                else:
+                    flag = 1
+                    break
+        if flag:
+            pass
+        else:
+            for i in range(8):
+                if _map[i][7]:
+                    flag = 1
+                    break
+            for j in range(_map_size - 7, _map_size):
+                if _map[7][j]:
+                    flag = 1
+                    break
+        if flag:  # 如果判为基地
+            for i in range(7):
+                for j in range(_map_size - 7, _map_size):
+                    _map[i][j] = 2
+
+        x = _map[_map_size - 1][_map_size - 1]
+        flag = 0
+        for i in range(_map_size - 7, _map_size):
+            for j in range(_map_size - 7, _map_size):
+                if _map[i][j] == x:
+                    pass
+                else:
+                    flag = 1
+                    break
+        if flag:
+            pass
+        else:
+            for i in range(_map_size - 7, _map_size):
+                if _map[i][_map_size - 8]:
+                    flag = 1
+                    break
+            for j in range(_map_size - 7, _map_size):
+                if _map[_map_size - 8][j]:
+                    flag = 1
+                    break
+        if flag:  # 如果判为基地
+            for i in range(_map_size - 7, _map_size):
+                for j in range(_map_size - 7, _map_size):
+                    _map[i][j] = 2
 
     def __init__(self, init_map):
         pass
@@ -62,11 +330,200 @@ class GameMain:
 
     def attack_phase(self):
         """Defence towers attack the units and units attack towers"""
-        pass
+
+        for flag in range(2):
+            tech_factor = 0.5 * (self.status[flag]['tech'] + 2)
+
+            for building in self.buildings[flag]['defence']:
+
+                #Bool Attack , 1/2 概率无效，攻击最近单位
+                if building.BuildingType == BuildingType.Bool:
+                    can_attack=random.randint(0,1)
+                    if not can_attack:
+                        continue
+                    else:
+                        pre_dist = OriginalBuildingAttribute[BuildingType.Bool][BuildingAttribute.ORIGINAL_RANGE] + 1
+                        target = None
+                        for enemy_id,enemy in self.units[1-flag].items():
+                            now_dist = abs(enemy.Position().x() - building.Position().x()) \
+                                       + abs(enemy.Position().y() - building.Position().y())
+                            if now_dist < pre_dist and enemy.HP() > 0:
+                                target = enemy
+                                target_id = enemy_id
+                                pre_dist=now_dist
+                        if target is not None:
+                            target.HP( target.HP() - (OriginalBuildingAttribute[BuildingType.Bool]
+                                                      [BuildingAttribute.ORIGINAL_ATTACK] * tech_factor))
+                            self.instruments[flag]['attack'].append((building.Unit_ID() , target_id))
+
+                #Ohm Attack , 同时击中V和C伤害加3倍（即乘4倍），攻击最近单位
+                if building.BuildingType == BuildingType.Ohm:
+                    building.CD -=1
+                    if building.CD <= 0:
+                        building.CD = OriginalBuildingAttribute[BuildingType.Ohm][BuildingAttribute.CD]
+                        pre_dist = OriginalBuildingAttribute[BuildingType.Ohm][BuildingAttribute.ORIGINAL_RANGE] + 1
+                        target = None
+                        for enemy_id,enemy in self.units[1-flag].items():
+                            now_dist = abs(enemy.Position().x() - building.Position().x()) + abs(enemy.Position().y()
+                                                                                                 - building.Position().y())
+                            if now_dist < pre_dist and enemy.HP() > 0:
+                                target = enemy
+                                target_id = enemy_id
+                                pre_dist = now_dist
+                        if target is not None:
+                            target_x = target.Position().x()
+                            target_y = target.Position().y()
+                            hit_v = 0
+                            hit_c = 0
+                            for enemy_id,enemy in self.units[1-flag].items():
+                                if (abs(enemy.Position().x() - target_x) + abs(enemy.Position().y() - target_y) <
+                                    OriginalBuildingAttribute[BuildingType.Ohm][BuildingAttribute.AOE]):
+                                    enemy.HP( enemy.HP() - (OriginalBuildingAttribute[BuildingType.Ohm]
+                                                            [BuildingAttribute.ORIGINAL_ATTACK] * tech_factor))
+                                    if enemy.Solider_Name() == SoliderName.VOLTAGE_SOURCE:
+                                        hit_v = 1
+                                    if enemy.Solider_Name() == SoliderName.CURRENT_SOURCE:
+                                        hit_c = 1
+                                if hit_v and hit_c:
+                                    for enemy_id, enemy in self.units[1 - flag].items():
+                                        if (abs(enemy.Position().x() - target_x) + abs(enemy.Position().y() - target_y)
+                                                <OriginalBuildingAttribute[BuildingType.Ohm][BuildingAttribute.AOE]):
+                                            enemy.HP(enemy.HP() - 3 * (OriginalBuildingAttribute[BuildingType.Ohm]
+                                                                       [BuildingAttribute.ORIGINAL_ATTACK] * tech_factor))
+                            self.instruments[flag]['attack'].append((building.Unit_ID(), target_id))
+                #Mole Attack，连续攻击同一个目标每次翻倍
+                if building.BuildingType == BuildingType.Mole:
+                    pre_dist = OriginalBuildingAttribute[BuildingType.Bool][BuildingAttribute.ORIGINAL_RANGE] + 1
+                    target = None
+                    find_last = False
+                    #查找上一个攻击目标是否还在攻击范围内
+                    for enemy_id,enemy in self.units[1-flag].items():
+                        if(enemy.HP()>0 and enemy_id == building.last_target_id and abs(enemy.Position().x()
+                            - building.Position().x()) + abs(enemy.Position().y() - building.Position().y()) < pre_dist):
+                            target=enemy
+                            building.mult_factor *= 2
+                            find_last = True
+                            break
+                    if not find_last:
+                        building.mult_factor = 1
+                        for enemy_id,enemy in self.units[1-flag].items():
+                            now_dist = abs(enemy.Position().x() - building.Position().x()) \
+                                       + abs(enemy.Position().y() - building.Position().y())
+                            if now_dist < pre_dist and enemy.HP() > 0:
+                                target = enemy
+                                target_id = enemy_id
+                                pre_dist = now_dist
+                    if target is not None:
+                        building.last_target_id= target_id
+                        target.HP( target.HP() - (OriginalBuildingAttribute[BuildingType.Mole]
+                                            [BuildingAttribute.ORIGINAL_ATTACK] * tech_factor * building.mult_factor))
+                        self.instruments[flag]['attack'].append((building.Unit_ID(), target_id))
+
+                #Monte_Carlo Attack,0-2之间随机数
+                if building.BuildingType == BuildingType.Monte_Carlo:
+                    building.CD -= 1
+                    if building.CD <= 0:
+                        building.CD = OriginalBuildingAttribute[BuildingType.Monte_Carlo][BuildingAttribute.CD]
+                        pre_dist = OriginalBuildingAttribute[BuildingType.Monte_Carlo][BuildingAttribute.ORIGINAL_RANGE] + 1
+                        target = None
+                        for enemy_id, enemy in self.units[1 - flag].items():
+                            now_dist = abs(enemy.Position().x() - building.Position().x()) \
+                                       + abs(enemy.Position().y() - building.Position().y())
+                            if now_dist < pre_dist and enemy.HP() > 0:
+                                target = enemy
+                                target_id = enemy_id
+                                pre_dist = now_dist
+                        if target is not None:
+                            rand_factor = random.uniform(0,2)
+                            target.HP(target.HP() - (OriginalBuildingAttribute[BuildingType.Bool]
+                                                     [BuildingAttribute.ORIGINAL_ATTACK] * tech_factor * rand_factor))
+                            self.instruments[flag]['attack'].append((building.Unit_ID(), target_id))
+
+                #Larry_Roberts Attack,优先数据包且对其伤害乘3
+                if building.BuildingType == BuildingType.Larry_Roberts:
+                    pre_dist = OriginalBuildingAttribute[BuildingType.Larry_Roberts][BuildingAttribute.ORIGINAL_RANGE] \
+                               + 1
+                    target = None
+                    hit_packet = False
+                    for enemy_id, enemy in self.units[1 - flag].items():
+                        now_dist = abs(enemy.Position().x() - building.Position().x()) \
+                                   + abs(enemy.Position().y() - building.Position().y())
+                        if now_dist < pre_dist and enemy.HP() > 0:
+                            if (not hit_packet) or enemy.Solider_Name == SoliderName.PACKET:
+                                target = enemy
+                                target_id = enemy_id
+                                pre_dist = now_dist
+                                if enemy.Solider_Name == SoliderName.PACKET:
+                                    hit_packet = True
+                    if target is not None:
+                        target_x = target.Position().x()
+                        target_y = target.Position().y()
+                        for enemy_id, enemy in self.units[1 - flag].items():
+                            if (abs(enemy.Position().x() - target_x) + abs(enemy.Position().y() - target_y) <
+                                    OriginalBuildingAttribute[BuildingType.Larry_Roberts][BuildingAttribute.AOE]):
+                                if enemy.Solider_Name == SoliderName.PACKET:
+                                    mult_factor = 3
+                                else:
+                                    mult_factor = 1
+                                enemy.HP(enemy.HP() - (OriginalBuildingAttribute[BuildingType.Larry_Roberts]
+                                                       [BuildingAttribute.ORIGINAL_ATTACK] * tech_factor * mult_factor))
+                        self.instruments[flag]['attack'].append((building.Unit_ID(), target_id))
+
+                #Robert_Kahn Attack,最大生命值10% * tech_factor
+                if building.BuildingType == BuildingType.Robert_Kahn:
+                    pre_dist = OriginalBuildingAttribute[BuildingType.Robert_Kahn][BuildingAttribute.ORIGINAL_RANGE] + 1
+                    target = None
+                    for enemy_id, enemy in self.units[1 - flag].items():
+                        now_dist = abs(enemy.Position().x() - building.Position().x()) \
+                                   + abs(enemy.Position().y() - building.Position().y())
+                        if now_dist < pre_dist and enemy.HP() > 0:
+                            target = enemy
+                            target_id = enemy_id
+                            pre_dist = now_dist
+                    if target is not None:
+                        persent = 0.1 * tech_factor
+                        target.HP(target.HP() - OriginalSoliderAttribute[target.SoliderName]
+                                    [SoliderAttr.SOLIDER_ORIGINAL_HP] * persent)
+                        self.instruments[flag]['attack'].append((building.Unit_ID(), target_id))
+
+                #Hawkin Attack,秒杀一格
+                if building.BuildingType == BuildingType.Hawkin:
+                    building.CD -= 1
+                    if building.CD <= 0:
+                        building.CD = OriginalBuildingAttribute[BuildingType.Hawkin][BuildingAttribute.CD]
+                        pre_dist = OriginalBuildingAttribute[BuildingType.Hawkin][BuildingAttribute.ORIGINAL_RANGE] + 1
+                        target = None
+                        for enemy_id, enemy in self.units[1 - flag].items():
+                            now_dist = abs(enemy.Position().x() - building.Position().x()) \
+                                       + abs(enemy.Position().y() - building.Position().y())
+                            if now_dist < pre_dist and enemy.HP() > 0:
+                                target = enemy
+                                target_id = enemy_id
+                                pre_dist = now_dist
+                        if target is not None:
+                            target_x = target.Position().x()
+                            target_y = target.Position().y()
+                            for enemy_id,enemy in self.units[1-flag].items():
+                                if (abs(enemy.Position().x() - target_x) + abs(enemy.Position().y() - target_y) <
+                                    OriginalBuildingAttribute[BuildingType.Hawkin][BuildingAttribute.AOE]):
+                                    enemy.HP(-1)
+                            self.instruments[flag]['attack'].append((building.Unit_ID(), target_id))
 
     def clean_up_phase(self):
         """Remove the destroyed units and towers"""
-        pass
+        for flag in range(2):
+            for unit_id,unit in self.units[flag].items():
+                if unit.HP() <= 0:
+                    self.units[flag].pop(unit_id)
+            for building in self.buildings[flag]['produce']:
+                if building.HP() <=0:
+                    self.buildings[flag]['produce'].remove(building)
+            for building in self.buildings[flag]['defense']:
+                if building.HP() <=0:
+                    self.buildings[flag]['defense'].remove(building)
+            for building in self.buildings[flag]['resource']:
+                if building.HP() <=0:
+                    self.buildings[flag]['resource'].remove(building)
 
     def move_phase(self):
         """Move the units according to their behaviour mode"""
@@ -247,40 +704,25 @@ class GameMain:
         """Deal with the update_age instruments"""
         basic_consumption = 0  #基础升级科技消耗，未定
         increased_consumption = 0   #科技每升一级，下次升级科技资源消耗增量
-
-        if  self.instruments[0]['update_age']:
-            consumption = basic_consumption + increased_consumption*self.status[0]['tech']
-            if  self.status[0]['money'] > consumption and self.status[0]['tech'] < Age.AI:
-                self.status[0]['money'] -= consumption
-                self.status[0]['tech'] += 1
-            else:
-                pass
-        if self.instruments[1]['update_age']:
-            consumption = basic_consumption + increased_consumption * self.status[1]['tech']
-            if self.status[1]['money'] > consumption and self.status[1]['tech'] < Age.AI:
-                self.status[1]['money'] -= consumption
-                self.status[1]['tech'] += 1
-            else:
-                pass
-
+        for flag in range(2):
+           if self.raw_instruments[flag]['update_age']:
+                consumption = basic_consumption + increased_consumption*self.status[flag]['tech']
+                if self.status[flag]['money'] > consumption and self.status[flag]['tech'] < Age.AI:
+                    self.status[flag]['money'] -= consumption
+                    self.status[flag]['tech'] += 1
+                    self.instruments[flag]['update_age'].append(True)
+                else:
+                    self.instruments[flag]['update_age'].append(False)
     def resource_phase(self):
         """Produce new resource and refresh building force"""
-
-        basic_resource=50
-        resource0=0
-        resource1=0
-
-        for i in self.buildings[0]['resource']:
-            resource0 += (basic_resource * 0.5 * (self.status[0]['tech']+2))
-        for i in self.buildings[1]['resource']:
-            resource1 += (basic_resource * 0.5 * (self.status[1]['tech']+2))
-
-        self.status[0]['money'] += resource0
-        self.status[1]['money'] += resource1
-
-        self.status[0]['building'] = self.status[0]['tech'] * 60 + 100
-        self.status[1]['building'] = self.status[1]['tech'] * 60 + 100
-
+        for flag in range(2):
+            basic_resource=OriginalBuildingAttribute[BuildingType.Programmer]
+            resource=0
+            for i in self.buildings[flag]['resource']:
+                resource += (basic_resource * 0.5 * (self.status[flag]['tech']+2))
+            self.status[flag]['money'] += resource
+            self.status[flag]['building'] = self.status[flag]['tech'] * 60 + 100
+            self.instruments[flag]['resource'].append(True)
     def next_tick(self):
         """回合演算与指令合法性判断"""
         self.attack_phase()
