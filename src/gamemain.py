@@ -4,7 +4,7 @@ import random
 
 class GameMain:
     _map_size = 200
-    _map = [[0 for i in range(_map_size)] for i in range(_map_size)]
+    _map = [[0 for j in range(_map_size)] for i in range(_map_size)]
     turn_num = 0
     winner = 3
     total_id = 0
@@ -484,16 +484,19 @@ class GameMain:
                     if (OriginalBuildingAttribute[construct_instrument[0]][BuildingAttribute.BUILDING_TYPE] ==
                             UnitType.PRODUCTION_BUILDING):
                         self.buildings[current_flag]['produce'].append((
-                            Building(building_name, building_hp, building_pos, current_flag, total_id, False),
+                            Building(building_name, building_pos, current_flag, total_id, False,
+                                     self.status[current_flag]['tech']),
                             produce_pos))
                     elif (OriginalBuildingAttribute[construct_instrument[0]][BuildingAttribute.BUILDING_TYPE] ==
                               UnitType.DEFENSIVE_BUILDING):
                         self.buildings[current_flag]['defence'].append((
-                            Building(building_name, building_hp, building_pos, current_flag, total_id, False),
+                            Building(building_name, building_pos, current_flag, total_id, False,
+                                     self.status[current_flag]['tech']),
                             produce_pos))
                     else:
                         self.buildings[current_flag]['resource'].append((
-                            Building(building_name, building_hp, building_pos, current_flag, total_id, False),
+                            Building(building_name, building_pos, current_flag, total_id, False,
+                                     self.status[current_flag]['tech']),
                             produce_pos))
 
                     total_id += 1
