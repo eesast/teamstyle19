@@ -338,7 +338,75 @@ class GameMain:
 
     def check_legal(self):
         """Remove the repeated instruments, or instruments on the wrong units"""
-        pass
+        for current_flag in range(2):
+            for instrument_type, instrument_list in self.raw_instruments[current_flag].items():
+                if instrument_type == 'update_age':
+                    continue
+                # 去重，并保持原来指令次序
+                new_instrument_list = list(set(instrument_list))
+                new_instrument_list.sort(key=instrument_list.index)
+
+                if instrument_type == 'construct':
+                    for instrument in new_instrument_list.copy():
+                        building_type = instrument[0]
+                        new_construct_pos = instrument[1]
+                        new_produce_pos = instrument[2]
+                        # 判断建造时代是否符合要求
+                        if (OriginalBuildingAttribute[building_type][BuildingAttribute.AGE].value >
+                                self.status[current_flag]['tech']):
+                            new_instrument_list.remove(instrument)
+                            continue
+                        # 判断建造位置是否符合要求
+                        if (self._map[new_construct_pos.x][new_construct_pos.y] == 1 or
+                                self._map[new_construct_pos.x][new_construct_pos.y] == 2):
+                            new_instrument_list.remove(instrument)
+                            continue
+                        building_range = 2 # 建造范围未定，暂设为2
+                        can_build = False
+                        for building_list in self.buildings[current_flag].values():
+                            for building in building_list:
+                                if (abs(building.Position.x - new_construct_pos.x) +
+                                        abs(building.Position.x - new_construct_pos.x) <=
+                                        building_range):
+                                    can_build = True
+                                    break
+                                if can_build:
+                                    break
+                        if not can_build:
+                            new_instrument_list.remove(instrument)
+                            continue
+                        # 判断生产位置是否符合要求
+                        if (OriginalBuildingAttribute[building_type][BuildingAttribute.BUILDING_TYPE] ==
+                                UnitType.PRODUCTION_BUILDING):
+                            if (abs(new_produce_pos.x - new_construct_pos.x) +
+                                    abs(new_produce_pos.y - new_construct_pos.y) >
+                                    OriginalBuildingAttribute[building_type][BuildingAttribute.ORIGINAL_RANGE]):
+                                new_instrument_list.remove(instrument)
+                                continue
+
+                else:
+                    # 去除指令对象id越界或不符合要求的情况
+                    for instrument in new_instrument_list.copy():
+                        if instrument > self.total_id or instrument < 0:
+                            new_instrument_list.remove(instrument)
+                            continue
+                        # 去除指令对象不是building的情况
+                        is_building = False
+                        for building_list in self.buildings[current_flag].values():
+                            for building in building_list:
+                                if building.Unit_ID == instrument:
+                                    is_building = True
+                                    break
+                            if is_building:
+                                break
+                        if not is_building:
+                            new_instrument_list.remove(instrument)
+                            continue
+                    # 资源不足，建筑和时代已经到达最高级的情况已经在操作函数中处理
+                    # sell指令去重之后不会出现卖空的情况
+                    # 其他未考虑到的情况可以继续进行补充
+
+                self.raw_instruments[current_flag][instrument_type] = new_instrument_list
 
     def attack_phase(self):
         """Defence towers attack the units and units attack towers"""
