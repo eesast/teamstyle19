@@ -3,7 +3,7 @@
 
 import random
 
-from .unit import *
+from unit import *
 
 
 class GameMain:
