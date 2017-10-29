@@ -338,13 +338,15 @@ class GameMain:
 
     def check_legal(self):
         """Remove the repeated instruments, or instruments on the wrong units"""
+        from functools import reduce
         for current_flag in range(2):
             for instrument_type, instrument_list in self.raw_instruments[current_flag].items():
                 if instrument_type == 'update_age':
                     continue
                 # 去重，并保持原来指令次序
-                new_instrument_list = list(set(instrument_list))
-                new_instrument_list.sort(key=instrument_list.index)
+                new_instrument_list = instrument_list
+                del_repeat = lambda x, y: x if y in x else x + [y]
+                reduce(del_repeat, [[], ] + new_instrument_list)
 
                 if instrument_type == 'construct':
                     for instrument in new_instrument_list.copy():
@@ -352,7 +354,7 @@ class GameMain:
                         new_construct_pos = Position(*instrument[1])
                         new_produce_pos = Position(*instrument[2])
                         # 判断建造时代是否符合要求
-                        if (OriginalBuildingAttribute[building_type][BuildingAttribute.AGE].value >
+                        if (OriginalBuildingAttribute[BuildingType(building_type)][BuildingAttribute.AGE].value >
                                 self.status[current_flag]['tech']):
                             new_instrument_list.remove(instrument)
                             continue
@@ -361,7 +363,7 @@ class GameMain:
                                 self._map[new_construct_pos.x][new_construct_pos.y] == 2):
                             new_instrument_list.remove(instrument)
                             continue
-                        building_range = 2 # 建造范围未定，暂设为2
+                        building_range = 2  # 建造范围未定，暂设为2
                         can_build = False
                         for building_list in self.buildings[current_flag].values():
                             for building in building_list:
@@ -590,6 +592,53 @@ class GameMain:
                                         OriginalBuildingAttribute[BuildingType.Hawkin][BuildingAttribute.AOE]):
                                     enemy.HP(-1)
                             self.instruments[flag]['attack'].append((building.Unit_ID(), target_id))
+
+            # 兵种对建筑的攻击
+            for unit_id, unit in self.units[flag]:
+                action_mode = OriginalSoliderAttribute[unit.Solider_Name][SoliderAttr.ACTION_MODE]
+                pre_dist = OriginalSoliderAttribute[unit.Solider_Name][SoliderAttr.ATTACK_RANGE] + 1
+
+                # 推塔式与抗线式兵种的攻击
+                if action_mode == ActionMode.BUILDING_ATTACK or action_mode == ActionMode.MOVING_ATTACK:
+                    target = None
+                    for building_list in self.buildings[1 - flag].values():
+                        for enemy_building in building_list:
+                            now_dist = (abs(enemy_building.Position.x - unit.Position.x) +
+                                        abs(enemy_building.Position.y - unit.Position.y))
+                            if now_dist < pre_dist and enemy_building.HP > 0:
+                                target = enemy_building
+                                pre_dist = now_dist
+                    if target is None:
+                        # 如果没有找到范围内的建筑，就查找基地是否在其范围内
+                        # 假设flag = 0 基地在(0,0)，flag = 1 基地在(199,199)
+                        if flag:
+                            now_dist_x = 0 if unit.Position.x >= 193 else 193 - unit.Position.x
+                            now_dist_y = 0 if unit.Position.y >= 193 else 193 - unit.Position.x
+                        else:
+                            now_dist_x = 0 if unit.Position.x <= 6 else unit.Position.x - 6
+                            now_dist_y = 0 if unit.Position.y <= 6 else unit.Position.x - 6
+                        now_dist = now_dist_x + now_dist_y
+                        if now_dist < pre_dist and self.main_base[1 - flag].HP > 0:
+                            target = self.main_base[1 - flag]
+                    if target is not None:
+                        target.HP -= (OriginalSoliderAttribute[unit.SoliderName][
+                                          SoliderAttr.SOLIDER_ORIGINAL_ATTACK] * tech_factor)
+                        self.instruments[flag]['attack'].append((unit_id, target.Unit_ID))
+
+                # 冲锋式兵种的攻击
+                else:
+                    if flag:
+                        now_dist_x = 0 if unit.Position.x >= 193 else 193 - unit.Position.x
+                        now_dist_y = 0 if unit.Position.y >= 193 else 193 - unit.Position.x
+                    else:
+                        now_dist_x = 0 if unit.Position.x <= 6 else unit.Position.x - 6
+                        now_dist_y = 0 if unit.Position.y <= 6 else unit.Position.x - 6
+                    now_dist = now_dist_x + now_dist_y
+                    if now_dist < pre_dist and self.main_base[1 - flag].HP > 0:
+                        self.main_base[1 - flag].HP -= (OriginalSoliderAttribute[unit.SoliderName][
+                                          SoliderAttr.SOLIDER_ORIGINAL_ATTACK] * tech_factor)
+                        unit.HP = -1
+                        self.instruments[flag]['attack'].append((unit_id, self.main_base[1 - flag].Unit_ID))
 
     def clean_up_phase(self):
         """Remove the destroyed units and towers"""
