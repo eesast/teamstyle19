@@ -328,8 +328,10 @@ class Building(object):
 
     @property
     def CD_left(self):
-        if self.__BuildingType is BuildingType.Programmer:
+        if self.__BuildingType == BuildingType.Programmer:
             raise AttributeError("Programmer Building has no attribute of CD_left")
+        else:
+            return self.__CD_left
 
     @CD_left.setter
     def CD_left(self, cd_left):
