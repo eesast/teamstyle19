@@ -333,82 +333,93 @@ class GameMain:
     def __init__(self):
         pass
 
-    def judge_winnner(self):
+    def judge_winner(self):
         pass
 
     def check_legal(self):
-        """Remove the repeated instruments, or instruments on the wrong units"""
-        from functools import reduce
+        instruments_tmp= [{
+        # (BuildingType,(BuildingPos.x,BuildingPos.y),(SoldierPos.x,SoldierPos.y))
+        'construct': [],
+        'maintain': [],  # id
+        'upgrade': [],  # id
+        'sell': [],  # id
+        'update_age': False,
+        } for _ in range(2)]
         for current_flag in range(2):
-            for instrument_type, instrument_list in self.raw_instruments[current_flag].items():
-                if instrument_type == 'update_age':
-                    continue
-                # 去重，并保持原来指令次序
-                new_instrument_list = instrument_list
-                del_repeat = lambda x, y: x if y in x else x + [y]
-                reduce(del_repeat, [[], ] + new_instrument_list)
+            #预处理，生成一个表示可以建筑区域的表并生成拥有的id列表
+            map_canbuild=[]
+            build_own=[]
+            for i in range(_map_size):
+                map_canbuild.append([0 for j in range(_map_size)])
+            #建造范围
+            build_range=2
+            #基地产生的建造范围
+            for i in range (build_range):
+                for j in range (7+build_range):
+                    if current_flag==0:
+                        map_canbuild[7+i][j]=1
+                        map_canbuild[j][7+i]=1
+                    else:
+                        map_canbuild[199-7-i][199-j]=1
+                        map_canbuild[199-j][199-7-i]=1
+            for build_list in buildings[current_flag]:
+                for build in build_list:
+                    for i in range(build_range)+1:
+                        for j in range(build_range-i)+1:
+                            if build.Position.x+i >=0 and build.Position.x+i <=199 and \
+                            build.Position.y+j>=0 and build.Position.y+j<=199:
+                                map_canbuild[build.Position.x+i][build.Position.y+j]=1
+                            if build.Position.x-i >=0 and build.Position.x-i <=199 and \
+                            build.Position.y+j>=0 and build.Position.y+j<=199:
+                                map_canbuild[build.Position.x-i][build.Position.y+j]=1
+                            if build.Position.x+i >=0 and build.Position.x+i <=199 and \
+                            build.Position.y-j>=0 and build.Position.y-j<=199:
+                                map_canbuild[build.Position.x+i][build.Position.y-j]=1
+                            if build.Position.x-i >=0 and build.Position.x-i <=199 and \
+                            build.Position.y-j>=0 and build.Position.y-j<=199:
+                                map_canbuild[build.Position.x-i][build.Position.y-j]=1
+            #删去已有建筑和道路位置
+            for build_list in buildings[current_flag]:
+                for build in build_list:
+                    map_canbuild[build.Position.x][build.Position.y]=0
+                    #顺便把建筑id加入拥有的id列表，减少遍历次数
+                    build_own.append(build.unit_id)
+            for i in range(200):
+                for j in range(200):
+                    if _map[i][j]!=0:
+                        map_canbuild[i][j]=0
 
-                if instrument_type == 'construct':
-                    for instrument in new_instrument_list.copy():
-                        building_type = instrument[0]
-                        new_construct_pos = Position(*instrument[1])
-                        new_produce_pos = Position(*instrument[2])
-                        # 判断建造时代是否符合要求
-                        if (OriginalBuildingAttribute[BuildingType(building_type)][BuildingAttribute.AGE].value >
-                                self.status[current_flag]['tech']):
-                            new_instrument_list.remove(instrument)
+            for build_type in build_list:
+                for build in  
+            for key,instruments_list in raw_instruments[current_flag]:
+                if key == 'update_age':
+                    if instruments_list:
+                        instruments_tmp['update_age']=True
+                elif key == 'construct':
+                    #检查时代要求
+                    for value in instruments_list:
+                        if (OriginalBuildingAttribute[building_type][BuildingAttribute.AGE].value > \
+                        self.status[current_flag]['tech']):
                             continue
-                        # 判断建造位置是否符合要求
-                        if (self._map[new_construct_pos.x][new_construct_pos.y] == 1 or
-                                self._map[new_construct_pos.x][new_construct_pos.y] == 2):
-                            new_instrument_list.remove(instrument)
-                            continue
-                        building_range = 2  # 建造范围未定，暂设为2
-                        can_build = False
-                        for building_list in self.buildings[current_flag].values():
-                            for building in building_list:
-                                if (abs(building.Position.x - new_construct_pos.x) +
-                                        abs(building.Position.x - new_construct_pos.x) <=
-                                        building_range):
-                                    can_build = True
-                                    break
-                            if can_build:
+                        #检查是否已经在该点发布了在这上面建造的命令
+                        judge=1
+                        for value_ins in instruments_tmp[current_flag]['construct']:
+                            if value[1]==value_ins[1]:
+                                judge=0
                                 break
-                        if not can_build:
-                            new_instrument_list.remove(instrument)
-                            continue
-                        # 判断生产位置是否符合要求
-                        if (OriginalBuildingAttribute[building_type][BuildingAttribute.BUILDING_TYPE] ==
-                                UnitType.PRODUCTION_BUILDING):
-                            if (abs(new_produce_pos.x - new_construct_pos.x) +
-                                    abs(new_produce_pos.y - new_construct_pos.y) >
-                                    OriginalBuildingAttribute[building_type][BuildingAttribute.ORIGINAL_RANGE]):
-                                new_instrument_list.remove(instrument)
-                                continue
-
+                        if judge:
+                            #检查建造点是否符合
+                            if map_canbuild[value[1][0]][value[1][1]]:
+                                #检查生产点是否符合
+                                if _map[value[2][0]][value[2][1] == 1:
+                                    instruments_tmp[current_flag]['construct'].append(value)
                 else:
-                    # 去除指令对象id越界或不符合要求的情况
-                    for instrument in new_instrument_list.copy():
-                        if instrument > self.total_id or instrument < 0:
-                            new_instrument_list.remove(instrument)
-                            continue
-                        # 去除指令对象不是building的情况
-                        is_building = False
-                        for building_list in self.buildings[current_flag].values():
-                            for building in building_list:
-                                if building.Unit_ID == instrument:
-                                    is_building = True
-                                    break
-                            if is_building:
-                                break
-                        if not is_building:
-                            new_instrument_list.remove(instrument)
-                            continue
-                    # 资源不足，建筑和时代已经到达最高级的情况已经在操作函数中处理
-                    # sell指令去重之后不会出现卖空的情况
-                    # 其他未考虑到的情况可以继续进行补充
-
-                self.raw_instruments[current_flag][instrument_type] = new_instrument_list
+                    for id_aim in instruments_list:     
+                        #查重和检查是否拥有单位
+                        if id_aim not in self.instruments_tmp[current_flag][key] and \
+                        id_aim in build_own:
+                            self.instruments_tmp[current_flag][key].append(value)
+        self.raw_instruments=instruments_tmp 
 
     def attack_phase(self):
         """Defence towers attack the units and units attack towers"""
