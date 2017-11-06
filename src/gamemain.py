@@ -848,7 +848,21 @@ class GameMain:
 
     def produce_phase(self):
         """Unit production by producing building"""
-        pass
+        for current_flag in range(2):
+            age_increase_factor = 0.5 * (self.status[current_flag]['tech'] + 2)
+            for building in self.buildings[current_flag]['produce']:
+                if building[0].CD_left == 0:
+                    solider_name=OriginalBuildingAttribute[building[0].BuildingType][BuildingAttribute.TRAGET]
+                    solider_hp=OriginalSoliderAttribute[solider_name][SoliderAttr.SOLIDER_ORIGINAL_HP]
+                    solider_pos=building[1]
+                    solider_flag=current_flag
+                    solider_id=self.total_id
+                    cd=OriginalBuildingAttribute[building[0].BuildingType][BuildingAttribute.CD]
+                    self.units[current_flag].append(Solider(solider_name,solider_hp,solider_pos,solider_flag,solider_id))
+                    building[0].CD_left=cd  #重置CD
+                    self.total_id+=1
+                else:
+                    building[0].CD_left=building[0].CD_left-1
 
     def update_age_phase(self):
         """Deal with the update_age instruments"""
