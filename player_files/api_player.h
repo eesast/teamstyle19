@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #define _NULL -1
 #define INT_MAX 1000000000
@@ -165,9 +165,10 @@ struct Solider {
     int heal;
     Position pos;
     int flag;
+    int unit_id
 
     Solider();
-    Solider(SoliderName solider_name, int heal, Position pos, int flag);
+    Solider(SoliderName solider_name, int heal, Position pos, int flag,int unit_id);
 };
 
 struct Building {
