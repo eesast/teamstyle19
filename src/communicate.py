@@ -69,8 +69,34 @@ def dump_map(map):
     return data
 
 
-def undump_instr(instructions):
-    pass
+def undump_instr(data: bytes):
+    instructions = {
+        'construct': [],  # (BuildingType,(BuildingPos.x,BuildingPos.y),(SoldierPos.x,SoldierPos.y))
+        'maintain': [],  # id
+        'upgrade': [],  # id
+        'sell': [],  # id
+        'update_age': False,
+    }
+    while len(data) >= 4:
+        instr_type = struct.unpack("i", data[:4])[0]
+        data = data[4:]
+        if instr_type == InstrType.Construct.value and len(data) >= 20:
+            construct_data = struct.unpack("iiiii", data[:20])
+            instructions["construct"].append(
+                (construct_data[0], (construct_data[1], construct_data[2]), (construct_data[3], construct_data[4])))
+            data = data[20:]
+        elif instr_type == InstrType.UpdateAge.value:
+            instructions["update_age"] = True
+        elif instr_type == InstrType.Upgrade.value and len(data) >= 4:
+            instructions["upgrade"].append(struct.unpack("i", data[:4])[0])
+            data = data[4:]
+        elif instr_type == InstrType.Maintain.value and len(data) >= 4:
+            instructions["maintain"].append(struct.unpack("i", data[:4])[0])
+            data = data[4:]
+        elif instr_type == InstrType.Sell.value and len(data) >= 4:
+            instructions["sell"].append(struct.unpack("i", data[:4])[0])
+            data = data[4:]
+    return instructions
 
 
 def wait_for(seconds: float):
@@ -203,28 +229,21 @@ class MainServer:
 
 
 def main():
-    server = MainServer("127.0.0.1", 5818)
+    server = MainServer("127.0.0.1", 5838)
     server.wait_for_connection()
-    player1, player2 = True, True
     for i in range(100):
         print("Round", i)
         msg = struct.pack("ii", MsgType.Id.value, i)
-        if player1 and player2:
-            server.send_to_players(msg)
-        elif player1:
-            server.send_to_player(msg, 0)
-        elif player2:
-            server.send_to_player(msg, 1)
+        server.send_to_players(msg)
         data = server.recv_instructions()
-        player1, player2 = False, False
         if data[0]:
-            playerNum1 = struct.unpack("i", data[0][4:])[0]
-            print("Player 1:", playerNum1, end=' ')
+            playerNum1 = undump_instr(data[0])
+            print("Player 1:", playerNum1)
             player1 = True
         else:
-            print("Player 1 miss", end=' ')
+            print("Player 1 miss")
         if data[1]:
-            playerNum2 = struct.unpack("i", data[1][4:])[0]
+            playerNum2 = undump_instr(data[1])
             print("Player 2:", playerNum2)
             player2 = True
         else:

@@ -3,18 +3,28 @@
 #include <stdlib.h>
 #include <sys/socket.h>
 #include <sys/types.h>
+#include <unistd.h>
+#include <fcntl.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <thread>
 #include "communicate.h"
 
+using std::mutex;
+using std::pair;
 
-class unix_socket : public recv_send_socket {
+extern mutex data_mutex;
+extern bool receiving;
+extern pair<char *, int> data_buffer;
+
+
+class UnixSocket : public RecvSendSocket {
 public:
-    unix_socket();
+    UnixSocket();
 
     void send_data(const char *msg, int len);
 
-    std::pair<char *, int> recv_data();
+    std::pair<char *, int> recv_data(bool blocked);
 
     void connect_to_server(const char *ip_address, unsigned short port);
 
@@ -22,7 +32,7 @@ private:
     int sockfd;
 };
 
-unix_socket::unix_socket()
+UnixSocket::UnixSocket()
 {
     sockfd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
     if (sockfd < 0)
@@ -32,7 +42,7 @@ unix_socket::unix_socket()
     }
 }
 
-void unix_socket::connect_to_server(const char *ip_address, unsigned short port)
+void UnixSocket::connect_to_server(const char *ip_address, unsigned short port)
 {
     struct sockaddr_in server_addr;
     memset(&server_addr, 0, sizeof(server_addr));
@@ -51,9 +61,10 @@ void unix_socket::connect_to_server(const char *ip_address, unsigned short port)
         perror("ERROR connecting\n");
         exit(1);
     }
+    fcntl(sockfd, F_SETFL, O_NONBLOCK);
 }
 
-void unix_socket::send_data(const char *msg, int32_t len)
+void UnixSocket::send_data(const char *msg, int32_t len)
 {
     char *data = new char[len + sizeof(int32_t)];
     memcpy(data, &len, sizeof(int32_t));
@@ -63,23 +74,54 @@ void unix_socket::send_data(const char *msg, int32_t len)
     {
         len -= send(sockfd, data, len, 0);
     }
-    delete[]data;
+    delete[] data;
 }
 
-std::pair<char *, int> unix_socket::recv_data()
+std::pair<char *, int> UnixSocket::recv_data(bool blocked)
 {
-    int32_t len, received = 0;
-    while ((received += recv(sockfd, reinterpret_cast<char *>(&len) + received, sizeof(int32_t) - received, 0)) !=
-           sizeof(int32_t));
+    int32_t len, received = 0, temp = recv(sockfd, reinterpret_cast<char *>(&len), sizeof(int32_t), 0);
+    if (temp <= 0 && !blocked)
+        return pair<char *, int>(NULL, 0);
+    if (temp > 0)
+        received += temp;
+    while (received != sizeof(int32_t))
+    {
+        temp = recv(sockfd, reinterpret_cast<char *>(&len) + received, sizeof(int32_t) - received, 0);
+        if (temp > -1)
+            received += temp;
+    }
     char *buf = new char[len];
     received = 0;
-    while ((received += recv(sockfd, buf + received, len - received, 0)) != len);
+    while (received != len)
+    {
+        temp = recv(sockfd, buf + received, len - received, 0);
+        if (temp > -1)
+            received += temp;
+    }
     return std::pair<char *, int>(buf, len);
 }
 
 
-recv_send_socket *create_socket()
+RecvSendSocket *create_socket()
 {
-    return new unix_socket;
+    return new UnixSocket;
 }
 
+void static_recv_data(RecvSendSocket *socket)
+{
+    pair<char *, int> local_buffer(NULL, 0);
+    while (receiving)
+    {
+        pair<char *, int> temp = socket->recv_data(false);
+        if (temp.second > 0)
+        {
+            local_buffer = temp;
+        }
+        if (local_buffer.second > 0 && data_mutex.try_lock())
+        {
+            data_buffer = local_buffer;
+            data_mutex.unlock();
+            local_buffer.second = 0;
+        }
+    }
+}
