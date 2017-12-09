@@ -239,13 +239,11 @@ def main():
         if data[0]:
             playerNum1 = undump_instr(data[0])
             print("Player 1:", playerNum1)
-            player1 = True
         else:
             print("Player 1 miss")
         if data[1]:
             playerNum2 = undump_instr(data[1])
             print("Player 2:", playerNum2)
-            player2 = True
         else:
             print("Player 2 miss")
     server.send_to_players(struct.pack("i", MsgType.GameOver.value))
