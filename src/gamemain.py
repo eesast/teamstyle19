@@ -721,16 +721,12 @@ class GameMain:
 
         def construct_phase(self):
 
-            print('\tconstruct_phase start')
-
             total_id = self.total_id
             for current_flag in range(2):
                 age_increase_factor = 0.5 * (self.status[current_flag]['tech'] + 2)
                 for construct_instrument in self.raw_instruments[current_flag]['construct']:
                     building_name = construct_instrument[0]
-                    print('\t',building_name)
                     building_pos = Position(*construct_instrument[1])
-                    print('\t',building_pos.x,building_pos.y)
                     money_cost = (
                         OriginalBuildingAttribute[construct_instrument[0]][BuildingAttribute.ORIGINAL_RESOURCE] *
                         age_increase_factor)
@@ -792,18 +788,15 @@ class GameMain:
                                     self.instruments[current_flag]['maintain'].append(building.Unit_ID)
                                 break
 
-                        # Maintain the buildings.
-
         maintain_phase(self)
 
         def upgrade_phase(self):
             for current_flag in range(2):
                 for building_type, building_array in self.buildings[current_flag].items():
-                    for element in building_array:
-                        building = element[0]
+                    for building in building_array:
                         for upgrade_instrument in self.raw_instruments[current_flag]['upgrade']:
                             if building.Unit_ID == upgrade_instrument:
-                                building_index = building_array.index(element)
+                                #building_index = building_array.index(element)
                                 max_HP = (
                                     OriginalBuildingAttribute[building.BuildingType][BuildingAttribute.ORIGINAL_HP] *
                                     0.5 * (building.level + 2))
@@ -819,12 +812,12 @@ class GameMain:
 
                                 if (self.status['money'] > lost_percent * construct_money + upgrade_diff_money
                                     and self.status['tech'] >=
-                                            self.buildings[current_flag][building_type][building_index][0].level + 1):
-                                    self.buildings[current_flag][building_type][building_index][0].level += 1
-                                    self.buildings[current_flag][building_type][building_index][0].HP = \
-                                        max_HP + upgrade_diff_max_HP
+                                            building.level + 1):
+                                    building.level += 1
+                                    building.HP = max_HP + upgrade_diff_max_HP
                                     self.status['money'] -= upgrade_diff_money + lost_percent * construct_money
                                     self.instruments[current_flag]['upgrade'].append(upgrade_instrument)
+                                break
         upgrade_phase(self)
 
         def sell_phase(self):
@@ -833,8 +826,7 @@ class GameMain:
                 for sell_instrument in self.raw_instruments[current_flag]['sell']:
                     have_found = False  # Signal if the building to be sold has been found.
                     for building_type, building_array in self.buildings[current_flag].items():
-                        for element in building_array:
-                            building = element[0]
+                        for building in building_array:
                             if building.Unit_ID == sell_instrument:
                                 max_HP = (
                                     OriginalBuildingAttribute[building.BuildingType][BuildingAttribute.ORIGINAL_HP] *
@@ -858,19 +850,19 @@ class GameMain:
         for current_flag in range(2):
             age_increase_factor = 0.5 * (self.status[current_flag]['tech'] + 2)
             for building in self.buildings[current_flag]['produce']:
-                if building[0].CD_left == 0:
-                    solider_name = OriginalBuildingAttribute[building[0].BuildingType][BuildingAttribute.TRAGET]
+                if building.CD_left == 0:
+                    solider_name = OriginalBuildingAttribute[building.BuildingType][BuildingAttribute.TRAGET]
                     solider_hp = OriginalSoliderAttribute[solider_name][SoliderAttr.SOLIDER_ORIGINAL_HP]
-                    solider_pos = building[1]
+                    solider_pos = building.ProducePos
                     solider_flag = current_flag
                     solider_id = self.total_id
-                    cd = OriginalBuildingAttribute[building[0].BuildingType][BuildingAttribute.CD]
-                    self.units[current_flag].append(
-                        Solider(solider_name, solider_hp, solider_pos, solider_flag, solider_id))
-                    building[0].CD_left = cd  # 重置CD
+                    cd = OriginalBuildingAttribute[building.BuildingType][BuildingAttribute.CD]
+                    self.units[current_flag][solider_id]=\
+                        Solider(solider_name, solider_hp, solider_pos, solider_flag, solider_id)
+                    building.CD_left = cd  # 重置CD
                     self.total_id += 1
                 else:
-                    building[0].CD_left = building[0].CD_left - 1
+                    building.CD_left = building.CD_left - 1
 
     def update_age_phase(self):
         """Deal with the update_age instruments"""
