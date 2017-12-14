@@ -773,29 +773,27 @@ class GameMain:
         def maintain_phase(self):
             for current_flag in range(2):
                 for building_type, building_array in self.buildings[current_flag].items():
-                    for element in building_array:
-                        building = element[0]
+                    for building in building_array:
                         # Change the status if The building is maintaining.
                         for maintain_instrument in self.raw_instruments[current_flag]['maintain']:
                             if building.Unit_ID == maintain_instrument:
                                 # Change the status of the true building, not its copy.
-                                building_index = building_array.index(element)
-                                self.buildings[current_flag][building_type][building_index][0].Is_Maintain = \
-                                    not self.buildings[current_flag][building_type][building_index][0].Is_Maintain
-                                self.instruments[current_flag]['maintain'].append(maintain_instrument)
+                                max_HP = (
+                                OriginalBuildingAttribute[building.BuildingType][BuildingAttribute.ORIGINAL_HP] *
+                                0.5 * (building.level + 2))
+                                lost_percent = (max_HP - building.HP) / max_HP  # The ratio of lost HP to max HP.
+                                construct_money = (
+                                    OriginalBuildingAttribute[building.BuildingType][
+                                        BuildingAttribute.ORIGINAL_RESOURCE] *
+                                    0.5 * (building.level + 2))
+                                if (self.status[current_flag]['money'] > lost_percent * construct_money):
+                                    building.HP = max_HP
+                                    self.status[current_flag]['money'] -= lost_percent * construct_money
+                                    self.instruments[current_flag]['maintain'].append(building.Unit_ID)
                                 break
 
                         # Maintain the buildings.
-                        max_HP = (OriginalBuildingAttribute[building.BuildingType][BuildingAttribute.ORIGINAL_HP] *
-                                  0.5 * (building.level + 2))
-                        lost_percent = (max_HP - building.HP) / max_HP  # The ratio of lost HP to max HP.
-                        construct_money = (
-                            OriginalBuildingAttribute[building.BuildingType][BuildingAttribute.ORIGINAL_RESOURCE] *
-                            0.5 * (building.level + 2))
-                        if (self.buildings[current_flag][building_type][building_index][0].Is_Maintain and
-                                    self.status['money'] > lost_percent * construct_money):
-                            self.buildings[current_flag][building_type][building_index][0].HP = max_HP
-                            self.status['money'] -= lost_percent * construct_money
+
         maintain_phase(self)
 
         def upgrade_phase(self):
@@ -899,39 +897,39 @@ class GameMain:
 
     def debug_print(self):
         '''debug时输出信息'''
-        # print('输出status中的信息')
-        # for flag in range(2):
-        #     print('flag:',flag)
-        #     for sta_type, sta_of_type in self.status[flag].items():
-        #         print(sta_type, ':', sta_of_type)
-        # print('输出raw_ins中的信息')
-        # for flag in range(2):
-        #     print('flag:', flag)
-        #     for ins_type, ins_of_type in self.raw_instruments[flag].items():
-        #         print(ins_type, end=':')
-        #         if type(ins_of_type) != bool:
-        #             for ins in ins_of_type:
-        #                 print(ins, end=' ')
-        #             print()
-        #         else:
-        #             print(ins_of_type)
-        # print('输出ins中的信息')
-        # for flag in range(2):
-        #     print('flag:', flag)
-        #     for ins_type, ins_of_type in self.instruments[flag].items():
-        #         print(ins_type, end=':')
-        #         if type(ins_of_type) != bool:
-        #             for ins in ins_of_type:
-        #                 print(ins, end=' ')
-        #             print()
-        #         else:
-        #             print(ins_of_type)
-        # print('输出building中的信息')
-        # for flag in range(2):
-        #     print('flag:', flag)
-        #     for building_type,buildings_of_type in self.buildings[flag].items():
-        #         for building in buildings_of_type:
-        #             print(building.Unit_ID,building.BuildingType,building.Position.x,building.Position.y)
+        print('输出status中的信息')
+        for flag in range(2):
+            print('flag:',flag)
+            for sta_type, sta_of_type in self.status[flag].items():
+                print(sta_type, ':', sta_of_type)
+        print('输出raw_ins中的信息')
+        for flag in range(2):
+            print('flag:', flag)
+            for ins_type, ins_of_type in self.raw_instruments[flag].items():
+                print(ins_type, end=':')
+                if type(ins_of_type) != bool:
+                    for ins in ins_of_type:
+                        print(ins, end=' ')
+                    print()
+                else:
+                    print(ins_of_type)
+        print('输出ins中的信息')
+        for flag in range(2):
+            print('flag:', flag)
+            for ins_type, ins_of_type in self.instruments[flag].items():
+                print(ins_type, end=':')
+                if type(ins_of_type) != bool:
+                    for ins in ins_of_type:
+                        print(ins, end=' ')
+                    print()
+                else:
+                    print(ins_of_type)
+        print('输出building中的信息')
+        for flag in range(2):
+            print('flag:', flag)
+            for building_type,buildings_of_type in self.buildings[flag].items():
+                for building in buildings_of_type:
+                    print(building.Unit_ID,building.BuildingType,building.Position.x,building.Position.y)
     def next_tick(self):
         '''调试输出部分'''
         print("next_tick start")
