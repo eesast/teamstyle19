@@ -360,7 +360,7 @@ class GameMain:
                             continue
                         # 判断建造位置是否符合要求
                         if (self._map[new_construct_pos.x][new_construct_pos.y] == 1 or
-                                self._map[new_construct_pos.x][new_construct_pos.y] == 2):
+                                    self._map[new_construct_pos.x][new_construct_pos.y] == 2):
                             new_instrument_list.remove(instrument)
                             continue
                         building_range = 2  # 建造范围未定，暂设为2
@@ -404,9 +404,9 @@ class GameMain:
                         if not is_building:
                             new_instrument_list.remove(instrument)
                             continue
-                    # 资源不足，建筑和时代已经到达最高级的情况已经在操作函数中处理
-                    # sell指令去重之后不会出现卖空的情况
-                    # 其他未考虑到的情况可以继续进行补充
+                            # 资源不足，建筑和时代已经到达最高级的情况已经在操作函数中处理
+                            # sell指令去重之后不会出现卖空的情况
+                            # 其他未考虑到的情况可以继续进行补充
 
                 self.raw_instruments[current_flag][instrument_type] = new_instrument_list
 
@@ -471,7 +471,7 @@ class GameMain:
                                         if (abs(enemy.Position().x() - target_x) + abs(enemy.Position().y() - target_y)
                                                 < OriginalBuildingAttribute[BuildingType.Ohm][BuildingAttribute.AOE]):
                                             enemy.HP(enemy.HP() - 3 * (OriginalBuildingAttribute[BuildingType.Ohm][
-                                                BuildingAttribute.ORIGINAL_ATTACK] * tech_factor))
+                                                                           BuildingAttribute.ORIGINAL_ATTACK] * tech_factor))
                             self.instruments[flag]['attack'].append((building.Unit_ID(), target_id))
                 # Mole Attack，连续攻击同一个目标每次翻倍
                 if building.BuildingType == BuildingType.Mole:
@@ -481,8 +481,8 @@ class GameMain:
                     # 查找上一个攻击目标是否还在攻击范围内
                     for enemy_id, enemy in self.units[1 - flag].items():
                         if (enemy.HP() > 0 and enemy_id == building.last_target_id and
-                                abs(enemy.Position().x() - building.Position().x()) +
-                                abs(enemy.Position().y() - building.Position().y()) < pre_dist):
+                                        abs(enemy.Position().x() - building.Position().x()) +
+                                        abs(enemy.Position().y() - building.Position().y()) < pre_dist):
                             target = enemy
                             building.mult_factor *= 2
                             find_last = True
@@ -499,7 +499,7 @@ class GameMain:
                     if target is not None:
                         building.last_target_id = target_id
                         target.HP(target.HP() - (OriginalBuildingAttribute[BuildingType.Mole][
-                            BuildingAttribute.ORIGINAL_ATTACK] * tech_factor * building.mult_factor))
+                                                     BuildingAttribute.ORIGINAL_ATTACK] * tech_factor * building.mult_factor))
                         self.instruments[flag]['attack'].append((building.Unit_ID(), target_id))
 
                 # Monte_Carlo Attack,0-2之间随机数
@@ -636,7 +636,7 @@ class GameMain:
                     now_dist = now_dist_x + now_dist_y
                     if now_dist < pre_dist and self.main_base[1 - flag].HP > 0:
                         self.main_base[1 - flag].HP -= (OriginalSoliderAttribute[unit.SoliderName][
-                                          SoliderAttr.SOLIDER_ORIGINAL_ATTACK] * tech_factor)
+                                                            SoliderAttr.SOLIDER_ORIGINAL_ATTACK] * tech_factor)
                         unit.HP = -1
                         self.instruments[flag]['attack'].append((unit_id, self.main_base[1 - flag].Unit_ID))
 
@@ -671,8 +671,8 @@ class GameMain:
                         if (enemy_building.BuildingType == BuildingType.Musk and
                             abs(enemy_building.Position.x - unit.Position.x) +
                             abs(enemy_building.Position.y - unit.Position.y) <=
-                            OriginalBuildingAttribute[enemy_building.BuildingType][
-                                BuildingAttribute.ORIGINAL_RANGE]):
+                                    OriginalBuildingAttribute[enemy_building.BuildingType][
+                                        BuildingAttribute.ORIGINAL_RANGE]):
                             can_move = False
                             break
                     if not can_move:
@@ -738,7 +738,7 @@ class GameMain:
 
                     # Ignore the instruments that spend too much.
                     if (self.status[current_flag]['money'] < money_cost and
-                            self.status[current_flag]['building'] < building_point_cost):
+                                self.status[current_flag]['building'] < building_point_cost):
                         continue
 
                     if (OriginalBuildingAttribute[construct_instrument[0]][BuildingAttribute.BUILDING_TYPE] ==
@@ -748,7 +748,7 @@ class GameMain:
                                      self.status[current_flag]['tech']),
                             produce_pos))
                     elif (OriginalBuildingAttribute[construct_instrument[0]][BuildingAttribute.BUILDING_TYPE] ==
-                            UnitType.DEFENSIVE_BUILDING):
+                              UnitType.DEFENSIVE_BUILDING):
                         self.buildings[current_flag]['defence'].append((
                             Building(building_name, building_pos, current_flag, total_id, False,
                                      self.status[current_flag]['tech']),
@@ -787,7 +787,7 @@ class GameMain:
                             OriginalBuildingAttribute[building.BuildingType][BuildingAttribute.ORIGINAL_RESOURCE] *
                             0.5 * (building.level + 2))
                         if (self.buildings[current_flag][building_type][building_index][0].Is_Maintain and
-                                self.status['money'] > lost_percent * construct_money):
+                                    self.status['money'] > lost_percent * construct_money):
                             self.buildings[current_flag][building_type][building_index][0].HP = max_HP
                             self.status['money'] -= lost_percent * construct_money
 
@@ -814,7 +814,7 @@ class GameMain:
 
                                 if (self.status['money'] > lost_percent * construct_money + upgrade_diff_money
                                     and self.status['tech'] >=
-                                        self.buildings[current_flag][building_type][building_index][0].level + 1):
+                                            self.buildings[current_flag][building_type][building_index][0].level + 1):
                                     self.buildings[current_flag][building_type][building_index][0].level += 1
                                     self.buildings[current_flag][building_type][building_index][0].HP = \
                                         max_HP + upgrade_diff_max_HP
@@ -852,17 +852,18 @@ class GameMain:
             age_increase_factor = 0.5 * (self.status[current_flag]['tech'] + 2)
             for building in self.buildings[current_flag]['produce']:
                 if building[0].CD_left == 0:
-                    solider_name=OriginalBuildingAttribute[building[0].BuildingType][BuildingAttribute.TRAGET]
-                    solider_hp=OriginalSoliderAttribute[solider_name][SoliderAttr.SOLIDER_ORIGINAL_HP]
-                    solider_pos=building[1]
-                    solider_flag=current_flag
-                    solider_id=self.total_id
-                    cd=OriginalBuildingAttribute[building[0].BuildingType][BuildingAttribute.CD]
-                    self.units[current_flag].append(Solider(solider_name,solider_hp,solider_pos,solider_flag,solider_id))
-                    building[0].CD_left=cd  #重置CD
-                    self.total_id+=1
+                    solider_name = OriginalBuildingAttribute[building[0].BuildingType][BuildingAttribute.TRAGET]
+                    solider_hp = OriginalSoliderAttribute[solider_name][SoliderAttr.SOLIDER_ORIGINAL_HP]
+                    solider_pos = building[1]
+                    solider_flag = current_flag
+                    solider_id = self.total_id
+                    cd = OriginalBuildingAttribute[building[0].BuildingType][BuildingAttribute.CD]
+                    self.units[current_flag].append(
+                        Solider(solider_name, solider_hp, solider_pos, solider_flag, solider_id))
+                    building[0].CD_left = cd  # 重置CD
+                    self.total_id += 1
                 else:
-                    building[0].CD_left=building[0].CD_left-1
+                    building[0].CD_left = building[0].CD_left - 1
 
     def update_age_phase(self):
         """Deal with the update_age instruments"""
