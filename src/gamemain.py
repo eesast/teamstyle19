@@ -26,9 +26,9 @@ class GameMain:
     } for _ in range(2)]
 
     status = [{
-        'money': 0,
-        'tech': 0,
-        'building': 0,
+        'money': 10000,
+        'tech': 3,
+        'building': 10000,
     } for _ in range(2)]
 
     # 通信模块将收到的指令写入，各阶段函数从中读取指令，指令格式同api_player.h
@@ -720,14 +720,17 @@ class GameMain:
         # Lack the legality judgement temporarily.
 
         def construct_phase(self):
+
+            print('\tconstruct_phase start')
+
             total_id = self.total_id
             for current_flag in range(2):
                 age_increase_factor = 0.5 * (self.status[current_flag]['tech'] + 2)
                 for construct_instrument in self.raw_instruments[current_flag]['construct']:
                     building_name = construct_instrument[0]
-                    building_hp = (OriginalBuildingAttribute[construct_instrument[0]][BuildingAttribute.ORIGINAL_HP] *
-                                   age_increase_factor)
+                    print('\t',building_name)
                     building_pos = Position(*construct_instrument[1])
+                    print('\t',building_pos.x,building_pos.y)
                     money_cost = (
                         OriginalBuildingAttribute[construct_instrument[0]][BuildingAttribute.ORIGINAL_RESOURCE] *
                         age_increase_factor)
@@ -743,26 +746,27 @@ class GameMain:
 
                     if (OriginalBuildingAttribute[construct_instrument[0]][BuildingAttribute.BUILDING_TYPE] ==
                             UnitType.PRODUCTION_BUILDING):
-                        self.buildings[current_flag]['produce'].append((
+                        self.buildings[current_flag]['produce'].append(
                             Building(building_name, building_pos, current_flag, total_id, False,
-                                     self.status[current_flag]['tech']),
-                            produce_pos))
+                                     self.status[current_flag]['tech'],produce_pos)
+                            )
                     elif (OriginalBuildingAttribute[construct_instrument[0]][BuildingAttribute.BUILDING_TYPE] ==
                             UnitType.DEFENSIVE_BUILDING):
-                        self.buildings[current_flag]['defence'].append((
+                        self.buildings[current_flag]['defence'].append(
                             Building(building_name, building_pos, current_flag, total_id, False,
-                                     self.status[current_flag]['tech']),
-                            produce_pos))
+                                     self.status[current_flag]['tech'], produce_pos)
+                            )
                     else:
-                        self.buildings[current_flag]['resource'].append((
+                        self.buildings[current_flag]['resource'].append(
                             Building(building_name, building_pos, current_flag, total_id, False,
-                                     self.status[current_flag]['tech']),
-                            produce_pos))
+                                     self.status[current_flag]['tech'], produce_pos)
+                            )
 
                     total_id += 1
                     self.status[current_flag]['money'] -= money_cost
                     self.status[current_flag]['building'] -= building_point_cost
                     self.instruments[current_flag]['construct'].append(construct_instrument)
+        construct_phase(self)
 
         def maintain_phase(self):
             for current_flag in range(2):
@@ -790,6 +794,7 @@ class GameMain:
                                 self.status['money'] > lost_percent * construct_money):
                             self.buildings[current_flag][building_type][building_index][0].HP = max_HP
                             self.status['money'] -= lost_percent * construct_money
+        maintain_phase(self)
 
         def upgrade_phase(self):
             for current_flag in range(2):
@@ -820,6 +825,7 @@ class GameMain:
                                         max_HP + upgrade_diff_max_HP
                                     self.status['money'] -= upgrade_diff_money + lost_percent * construct_money
                                     self.instruments[current_flag]['upgrade'].append(upgrade_instrument)
+        upgrade_phase(self)
 
         def sell_phase(self):
             # age_increase_factor = 0.5 * (self.status[current_flag]['tech'] + 2)
@@ -845,6 +851,7 @@ class GameMain:
                         if have_found:
                             break
                     self.instruments[current_flag]['sell'].append(sell_instrument)
+        sell_phase(self)
 
     def produce_phase(self):
         """Unit production by producing building"""
@@ -887,14 +894,51 @@ class GameMain:
             self.status[flag]['building'] = self.status[flag]['tech'] * 60 + 100
             self.instruments[flag]['resource'] = True
 
+    def debug_print(self):
+        '''debug时输出信息'''
+        # print('输出status中的信息')
+        # for flag in range(2):
+        #     print('flag:',flag)
+        #     for sta_type, sta_of_type in self.status[flag].items():
+        #         print(sta_type, ':', sta_of_type)
+        # print('输出raw_ins中的信息')
+        # for flag in range(2):
+        #     print('flag:', flag)
+        #     for ins_type, ins_of_type in self.raw_instruments[flag].items():
+        #         print(ins_type, end=':')
+        #         if type(ins_of_type) != bool:
+        #             for ins in ins_of_type:
+        #                 print(ins, end=' ')
+        #             print()
+        #         else:
+        #             print(ins_of_type)
+        # print('输出ins中的信息')
+        # for flag in range(2):
+        #     print('flag:', flag)
+        #     for ins_type, ins_of_type in self.instruments[flag].items():
+        #         print(ins_type, end=':')
+        #         if type(ins_of_type) != bool:
+        #             for ins in ins_of_type:
+        #                 print(ins, end=' ')
+        #             print()
+        #         else:
+        #             print(ins_of_type)
+        # print('输出building中的信息')
+        # for flag in range(2):
+        #     print('flag:', flag)
+        #     for building_type,buildings_of_type in self.buildings[flag].items():
+        #         for building in buildings_of_type:
+        #             print(building.Unit_ID,building.BuildingType,building.Position.x,building.Position.y)
     def next_tick(self):
+        '''调试输出部分'''
+        print("next_tick start")
+
+
         """回合演算与指令合法性判断"""
         self.attack_phase()
         self.clean_up_phase()
         self.move_phase()
-
-        self.check_legal()
-
+        # self.check_legal()
         self.building_phase()
         self.produce_phase()
         self.update_age_phase()
@@ -902,6 +946,7 @@ class GameMain:
         # self.update_id()
         self.judge_winnner()
 
+        self.debug_print()
 
 def main():
     game = GameMain()

@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-from enum import Enum
+from enum import IntEnum
 
 """
 为保证基类调用时的安全性 所有属性都设置为了私有 同时为了方便调用 使用了装饰器来提供返回值
@@ -12,7 +12,7 @@ Inf = 9999999
 
 
 # *****************************Enum Value ant Table*****************************
-class Command(Enum):
+class Command(IntEnum):
     Construct = 0
     Maintain = 1
     Upgrade = 2
@@ -20,7 +20,7 @@ class Command(Enum):
     Update_Age = 4
 
 
-class UnitType(Enum):
+class UnitType(IntEnum):
     Base = 0
 
     PRODUCTION_BUILDING = 1
@@ -32,7 +32,7 @@ class UnitType(Enum):
     ALL = 6
 
 
-class Age(Enum):
+class Age(IntEnum):
     BIT = 0
     CIRCUIT = 1
     PROCESSOR = 2
@@ -41,7 +41,7 @@ class Age(Enum):
     AI = 5
 
 
-class BuildingType(Enum):
+class BuildingType(IntEnum):
     Base = 0
 
     Shannon = 1
@@ -65,7 +65,7 @@ class BuildingType(Enum):
     Programmer = 17
 
 
-class BuildingAttribute(Enum):
+class BuildingAttribute(IntEnum):
     BUILDING_TYPE = 0
     ORIGINAL_HP = 1
     ORIGINAL_ATTACK = 2
@@ -78,7 +78,7 @@ class BuildingAttribute(Enum):
     CD = 9
 
 
-class SoliderName(Enum):
+class SoliderName(IntEnum):
     BIT_STREAM = 0
     VOLTAGE_SOURCE = 1
     CURRENT_SOURCE = 2
@@ -89,7 +89,7 @@ class SoliderName(Enum):
     ULTRON = 7
 
 
-class SoliderAttr(Enum):
+class SoliderAttr(IntEnum):
     SOLIDER_TYPE = 0
     ACTION_MODE = 1
     SOLIDER_ORIGINAL_HP = 2
@@ -98,7 +98,7 @@ class SoliderAttr(Enum):
     SPEED = 5
 
 
-class ActionMode(Enum):
+class ActionMode(IntEnum):
     BUILDING_ATTACK = 0
     BASE_ATTACK = 1
     MOVING_ATTACK = 2
@@ -284,7 +284,7 @@ class Position(object):
 
 
 class Building(object):
-    def __init__(self, building_type, pos, flag, unit_id, maintain, time):
+    def __init__(self, building_type, pos, flag, unit_id, maintain, time, produce_pos):
         self.__BuildingType = building_type
         self.__HP = OriginalBuildingAttribute[building_type][BuildingAttribute.ORIGINAL_HP] * (0.5 + time / 2)
         self.__Position = pos
@@ -293,9 +293,18 @@ class Building(object):
         self.__Is_Maintain = maintain
         self.level = time
         self.__CD_left = 0
+        self.__Produce_Position = produce_pos
         # 以下为仅用于BuildingType为Mole的成员
         self.last_target_id = -1
         self.mult_factor = 1
+
+    @property
+    def ProducePos(self):
+        return self.__Produce_Position
+
+    @ProducePos.setter
+    def ProducePos(self,produce_pos):
+        self.__Produce_Position = produce_pos
 
     @property
     def HP(self):
