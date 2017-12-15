@@ -50,14 +50,13 @@ while game.winner == 3:
         game.raw_instruments = json.loads(line)
     else:
         print("read to the end of file")
-        break
 
     # 由于通信模块未写，直接将每回合信息写入文件，方便之后调试
-    file.append(json.dumps({'turn': game.turn_num}))
-    file.append(json.dumps(game.buildings, default=building2dict))
-    file.append(json.dumps(game.units, default=unit2dict))
-    file.append(json.dumps(game.status))
-    file.append(json.dumps(game.instruments, default=BuildingType2Str))
+    # file.append(json.dumps({'turn': game.turn_num}))
+    # file.append(json.dumps(game.buildings, default=building2dict))
+    # file.append(json.dumps(game.units, default=unit2dict))
+    # file.append(json.dumps(game.status))
+    # file.append(json.dumps(game.instruments, default=BuildingType2Str))
 
     print("server turns:", game.turn_num)
     game.next_tick()

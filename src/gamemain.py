@@ -28,7 +28,7 @@ class GameMain:
     status = [{
         'money': 10000,
         'tech': 3,
-        'building': 10000,
+        'building': 0,
     } for _ in range(2)]
 
     # 通信模块将收到的指令写入，各阶段函数从中读取指令，指令格式同api_player.h
@@ -58,6 +58,12 @@ class GameMain:
         _map_size = self._map_size
 
         # 生成基地，位置定在0,0和199,199处
+        self.main_base[0] = Building(BuildingType.Base, Position(0, 0), 0, self.total_id,
+                                     False, 0 ,Position(0, 0))
+        self.total_id += 1
+        self.main_base[1] = Building(BuildingType.Base, Position(199, 199), 1, self.total_id,
+                                     False, 0, Position(199, 199))
+        self.total_id += 1
         for i in range(7):
             for j in range(7):
                 _map[i][j] = 2
@@ -331,7 +337,7 @@ class GameMain:
                     _map[i][j] = 2
 
     def __init__(self):
-        pass
+        self.init_map_random()
 
     def judge_winnner(self):
         if self.turn_num == Inf:
@@ -619,7 +625,7 @@ class GameMain:
                             self.instruments[flag]['attack'].append((building.Unit_ID(), target_id))
 
             # 兵种对建筑的攻击
-            for unit_id, unit in self.units[flag]:
+            for unit_id, unit in self.units[flag].items():
                 action_mode = OriginalSoliderAttribute[unit.Solider_Name][SoliderAttr.ACTION_MODE]
                 pre_dist = OriginalSoliderAttribute[unit.Solider_Name][SoliderAttr.ATTACK_RANGE] + 1
 
@@ -638,7 +644,7 @@ class GameMain:
                         # 假设flag = 0 基地在(0,0)，flag = 1 基地在(199,199)
                         if flag:
                             now_dist_x = 0 if unit.Position.x >= 193 else 193 - unit.Position.x
-                            now_dist_y = 0 if unit.Position.y >= 193 else 193 - unit.Position.x
+                            now_dist_y = 0 if unit.Position.y >= 193 else 193 - unit.Position.y
                         else:
                             now_dist_x = 0 if unit.Position.x <= 6 else unit.Position.x - 6
                             now_dist_y = 0 if unit.Position.y <= 6 else unit.Position.x - 6
@@ -646,7 +652,7 @@ class GameMain:
                         if now_dist < pre_dist and self.main_base[1 - flag].HP > 0:
                             target = self.main_base[1 - flag]
                     if target is not None:
-                        target.HP -= (OriginalSoliderAttribute[unit.SoliderName][
+                        target.HP -= (OriginalSoliderAttribute[unit.Solider_Name][
                                           SoliderAttr.SOLIDER_ORIGINAL_ATTACK] * tech_factor)
                         self.instruments[flag]['attack'].append((unit_id, target.Unit_ID))
 
@@ -669,16 +675,16 @@ class GameMain:
         """Remove the destroyed units and towers"""
         for flag in range(2):
             for unit_id, unit in self.units[flag].items():
-                if unit.HP() <= 0:
+                if unit.HP <= 0:
                     self.units[flag].pop(unit_id)
             for building in self.buildings[flag]['produce']:
-                if building.HP() <= 0:
+                if building.HP <= 0:
                     self.buildings[flag]['produce'].remove(building)
             for building in self.buildings[flag]['defence']:
-                if building.HP() <= 0:
+                if building.HP <= 0:
                     self.buildings[flag]['defence'].remove(building)
             for building in self.buildings[flag]['resource']:
-                if building.HP() <= 0:
+                if building.HP <= 0:
                     self.buildings[flag]['resource'].remove(building)
 
     def move_phase(self):
@@ -687,12 +693,12 @@ class GameMain:
         for current_flag in range(2):
             # Assume player 0's base is at(0,0) temporarily, which can be changed.
             direction = 1 if current_flag == 0 else -1
-            can_move = True
 
             for unit_id, unit in self.units[current_flag].items():
                 # Building Musk's skill : AI cannot move in its shot range.
-                if unit.Solider_Name == SoliderName.TURNING_MACHINE or SoliderName.ULTRON:
-                    for enemy_building in self.buildings[not current_flag]['defence']:
+                if unit.Solider_Name == SoliderName.TURNING_MACHINE or unit.Solider_Name == SoliderName.ULTRON:
+                    can_move = True
+                    for enemy_building in self.buildings[1 - current_flag]['defence']:
                         if (enemy_building.BuildingType == BuildingType.Musk and
                             abs(enemy_building.Position.x - unit.Position.x) +
                             abs(enemy_building.Position.y - unit.Position.y) <=
@@ -708,9 +714,9 @@ class GameMain:
                     for i in range(OriginalSoliderAttribute[unit.Solider_Name][SoliderAttr.SPEED]):
                         # When solider is moving, if there are buildings in solider's shot range,
                         # stop to attack the building, else continue moving.
-                        for building_type, building_array in self.buildings[not current_flag].items():
-                            for element in building_array:
-                                enemy_building = element[0]
+                        for building_type, building_array in self.buildings[1 - current_flag].items():
+                            can_move = True
+                            for enemy_building in building_array:
                                 if (abs(enemy_building.Position.x - unit.Position.x) +
                                         abs(enemy_building.Position.y - unit.Position.y) <=
                                         OriginalSoliderAttribute[unit.Solider_Name][SoliderAttr.ATTACK_RANGE]):
@@ -722,22 +728,22 @@ class GameMain:
                         if can_move:
                             if _map[unit.Position.x + direction][unit.Position.y] == 1:
                                 # Position need to be changed.
-                                self.units[current_flag][unit_id].Position.x += direction
+                                unit.Position.x += direction
                             elif _map[unit.Position.x][unit.Position.y + direction] == 1:
-                                self.units[current_flag][unit_id].Position.y += direction
-                            self.instruments[current_flag]['move'].append(
-                                (unit_id, self.units[current_flag][unit_id].Position))
+                                unit.Position.y += direction
                         else:
                             break
+                    self.instruments[current_flag]['move'].append(
+                        (unit_id, unit.Position))
 
                 else:
                     for i in range(OriginalSoliderAttribute[unit.Solider_Name][SoliderAttr.SPEED]):
                         if _map[unit.Position.x + direction][unit.Position.y] == 1:
-                            self.units[current_flag][unit_id].Position.x += direction
+                            unit.Position.x += direction
                         elif _map[unit.Position.x][unit.Position.y + direction] == 1:
-                            self.units[current_flag][unit_id].Position.y += direction
-                        self.instruments[current_flag]['move'].append(
-                            (unit_id, self.units[current_flag][unit_id].Position))
+                            unit.Position.y += direction
+                    self.instruments[current_flag]['move'].append(
+                        (unit_id, unit.Position))
 
     def building_phase(self):
         """Deal with the instruments about buildings"""
@@ -835,12 +841,12 @@ class GameMain:
                                 upgrade_diff_max_HP = OriginalBuildingAttribute[building.BuildingType][
                                                           BuildingAttribute.ORIGINAL_HP] * 0.5
 
-                                if (self.status['money'] > lost_percent * construct_money + upgrade_diff_money
-                                    and self.status['tech'] >=
+                                if (self.status[current_flag]['money'] > lost_percent * construct_money + upgrade_diff_money
+                                    and self.status[current_flag]['tech'] >=
                                             building.level + 1):
                                     building.level += 1
                                     building.HP = max_HP + upgrade_diff_max_HP
-                                    self.status['money'] -= upgrade_diff_money + lost_percent * construct_money
+                                    self.status[current_flag]['money'] -= upgrade_diff_money + lost_percent * construct_money
                                     self.instruments[current_flag]['upgrade'].append(upgrade_instrument)
                                 break
         upgrade_phase(self)
@@ -861,7 +867,7 @@ class GameMain:
                                                        BuildingAttribute.ORIGINAL_RESOURCE] *
                                                    0.5 * (building.level + 2))
 
-                                self.status['money'] += return_percent * construct_money
+                                self.status[current_flag]['money'] += return_percent * construct_money
                                 self.buildings[current_flag][building_type].remove(building)
                                 have_found = True
                                 break
@@ -964,7 +970,7 @@ class GameMain:
         # self.update_id()
         self.judge_winnner()
 
-        self.debug_print()
+        #self.debug_print()
 
 def main():
     game = GameMain()
