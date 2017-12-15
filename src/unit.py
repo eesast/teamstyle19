@@ -158,7 +158,7 @@ OriginalBuildingAttribute = {
     BuildingType.Tony_Stark: {BuildingAttribute.BUILDING_TYPE: UnitType.PRODUCTION_BUILDING,
                               BuildingAttribute.ORIGINAL_HP: 1000, BuildingAttribute.ORIGINAL_ATTACK: None,
                               BuildingAttribute.ORIGINAL_RANGE: 10,
-                              BuildingAttribute.TRAGET: SoliderName.TURNING_MACHINE, BuildingAttribute.AGE: Age.AI,
+                              BuildingAttribute.TRAGET: SoliderName.ULTRON, BuildingAttribute.AGE: Age.AI,
                               BuildingAttribute.ORIGINAL_RESOURCE: 1000, BuildingAttribute.ORIGINAL_BUILDING_POINT: 80,
                               BuildingAttribute.AOE: None, BuildingAttribute.CD: 10},
 
