@@ -920,33 +920,36 @@ class GameMain:
 
     def debug_print(self):
         '''debug时输出信息'''
+        print("输出主基地血量")
+        for flag in range(2):
+            print("flag:",flag,"HP:",self.main_base[flag].HP)
         print('输出status中的信息')
         for flag in range(2):
             print('flag:',flag)
             for sta_type, sta_of_type in self.status[flag].items():
                 print(sta_type, ':', sta_of_type)
-        print('输出raw_ins中的信息')
-        for flag in range(2):
-            print('flag:', flag)
-            for ins_type, ins_of_type in self.raw_instruments[flag].items():
-                print(ins_type, end=':')
-                if type(ins_of_type) != bool:
-                    for ins in ins_of_type:
-                        print(ins, end=' ')
-                    print()
-                else:
-                    print(ins_of_type)
-        print('输出ins中的信息')
-        for flag in range(2):
-            print('flag:', flag)
-            for ins_type, ins_of_type in self.instruments[flag].items():
-                print(ins_type, end=':')
-                if type(ins_of_type) != bool:
-                    for ins in ins_of_type:
-                        print(ins, end=' ')
-                    print()
-                else:
-                    print(ins_of_type)
+        # print('输出raw_ins中的信息')
+        # for flag in range(2):
+        #     print('flag:', flag)
+        #     for ins_type, ins_of_type in self.raw_instruments[flag].items():
+        #         print(ins_type, end=':')
+        #         if type(ins_of_type) != bool:
+        #             for ins in ins_of_type:
+        #                 print(ins, end=' ')
+        #             print()
+        #         else:
+        #             print(ins_of_type)
+        # print('输出ins中的信息')
+        # for flag in range(2):
+        #     print('flag:', flag)
+        #     for ins_type, ins_of_type in self.instruments[flag].items():
+        #         print(ins_type, end=':')
+        #         if type(ins_of_type) != bool:
+        #             for ins in ins_of_type:
+        #                 print(ins, end=' ')
+        #             print()
+        #         else:
+        #             print(ins_of_type)
         print('输出building中的信息')
         for flag in range(2):
             print('flag:', flag)
@@ -970,7 +973,7 @@ class GameMain:
         # self.update_id()
         self.judge_winnner()
 
-        #self.debug_print()
+        self.debug_print()
 
 def main():
     game = GameMain()
