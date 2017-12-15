@@ -106,7 +106,13 @@ class ActionMode(IntEnum):
 
 OriginalBuildingAttribute = {
 
-    BuildingType.Base: {BuildingAttribute.BUILDING_TYPE: UnitType.Base, None: None},  # need to complete
+    BuildingType.Base: {BuildingAttribute.BUILDING_TYPE: UnitType.Base,
+                        BuildingAttribute.ORIGINAL_HP: 10000, BuildingAttribute.ORIGINAL_ATTACK: None,
+                        BuildingAttribute.ORIGINAL_RANGE: 0, BuildingAttribute.TRAGET: None,
+                        BuildingAttribute.AGE: None, BuildingAttribute.ORIGINAL_RESOURCE: None,
+                        BuildingAttribute.ORIGINAL_BUILDING_POINT: None, BuildingAttribute.AOE: None,
+                        BuildingAttribute.CD: None}
+,  # need to complete
     BuildingType.Shannon: {BuildingAttribute.BUILDING_TYPE: UnitType.PRODUCTION_BUILDING,
                            BuildingAttribute.ORIGINAL_HP: 100, BuildingAttribute.ORIGINAL_ATTACK: None,
                            BuildingAttribute.ORIGINAL_RANGE: 10, BuildingAttribute.TRAGET: SoliderName.BIT_STREAM,
@@ -371,6 +377,11 @@ class Solider(object):
     @property
     def Position(self):
         return self.__Position
+
+    @Position.setter
+    def Position(self,x,y):
+        Position.x = x
+        Position.y = y
 
     @property
     def Flag(self):
