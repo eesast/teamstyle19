@@ -41,7 +41,10 @@ read_file = open("test.txt", 'r')
 game = GameMain()
 print('start')
 file = []
+print_count = 0
 
+f = open("debug.txt", 'w')
+f.close()
 while game.winner == 3:
     # 由于未写通信模块，故每回合指令写入txt中，随后自动逐行读取
 
@@ -49,18 +52,15 @@ while game.winner == 3:
     if line:
         game.raw_instruments = json.loads(line)
     else:
-        print("read to the end of file")
+        game.raw_instruments = [{
+        'construct': [],  # (BuildingType,(BuildingPos.x,BuildingPos.y),(SoldierPos.x,SoldierPos.y))
+        'maintain': [],  # id
+        'upgrade': [],  # id
+        'sell': [],  # id
+        'update_age': False,
+        } for _ in range(2)]
 
     # 由于通信模块未写，直接将每回合信息写入文件，方便之后调试
-    # file.append(json.dumps({'turn': game.turn_num}))
-    # file.append(json.dumps(game.buildings, default=building2dict))
-    # file.append(json.dumps(game.units, default=unit2dict))
-    # file.append(json.dumps(game.status))
-    # file.append(json.dumps(game.instruments, default=BuildingType2Str))
-
-    print("server turns:", game.turn_num)
     game.next_tick()
 
-with open(filename, 'w') as f:
-    f.writelines(file)
-    f.write(str(game.winner))
+
