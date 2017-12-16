@@ -360,9 +360,9 @@ class GameMain:
                 self.winner = 2
             else:
                 self.winner = 3
-        elif self.main_base[0].blood == 0 and self.main_base[1].blood != 0:
+        elif self.main_base[0].HP == 0 and self.main_base[1].HP != 0:
             self.winner = 1
-        elif self.main_base[1].blood == 0 and self.main_base[0].blood != 0:
+        elif self.main_base[1].HP == 0 and self.main_base[0].HP != 0:
             self.winner = 2
         else:
             self.winner = 3
@@ -375,9 +375,8 @@ class GameMain:
                 if instrument_type == 'update_age':
                     continue
                 # 去重，并保持原来指令次序
-                new_instrument_list = instrument_list
                 del_repeat = lambda x, y: x if y in x else x + [y]
-                reduce(del_repeat, [[], ] + new_instrument_list)
+                new_instrument_list = reduce(del_repeat, [[], ] + instrument_list)
 
                 if instrument_type == 'construct':
                     for instrument in new_instrument_list.copy():
@@ -396,7 +395,12 @@ class GameMain:
                             continue
                         building_range = 2  # 建造范围未定，暂设为2
                         can_build = False
+                        count = 0
                         for building_list in self.buildings[current_flag].values():
+                            if not building_list:
+                                count += 1
+                            if count == 3:
+                                can_build = True
                             for building in building_list:
                                 if (abs(building.Position.x - new_construct_pos.x) +
                                         abs(building.Position.x - new_construct_pos.x) <=
@@ -405,6 +409,7 @@ class GameMain:
                                     break
                             if can_build:
                                 break
+
                         if not can_build:
                             new_instrument_list.remove(instrument)
                             continue
@@ -416,6 +421,9 @@ class GameMain:
                                     OriginalBuildingAttribute[building_type][BuildingAttribute.ORIGINAL_RANGE]):
                                 new_instrument_list.remove(instrument)
                                 continue
+                            elif self._map[new_produce_pos.x][new_produce_pos.y] != 1:
+                                new_instrument_list.remove(instrument)
+                                continue
 
                 else:
                     # 去除指令对象id越界或不符合要求的情况
@@ -425,11 +433,16 @@ class GameMain:
                             continue
                         # 去除指令对象不是building的情况
                         is_building = False
+                        count = 0
                         for building_list in self.buildings[current_flag].values():
+                            if not building_list:
+                                count += 1
                             for building in building_list:
                                 if building.Unit_ID == instrument:
                                     is_building = True
                                     break
+                            if count == 3:
+                                is_building = True
                             if is_building:
                                 break
                         if not is_building:
@@ -458,16 +471,16 @@ class GameMain:
                         pre_dist = OriginalBuildingAttribute[BuildingType.Bool][BuildingAttribute.ORIGINAL_RANGE] + 1
                         target = None
                         for enemy_id, enemy in self.units[1 - flag].items():
-                            now_dist = abs(enemy.Position().x() - building.Position().x()) \
-                                       + abs(enemy.Position().y() - building.Position().y())
-                            if now_dist < pre_dist and enemy.HP() > 0:
+                            now_dist = abs(enemy.Position.x - building.Position.x) \
+                                       + abs(enemy.Position.y - building.Position.y)
+                            if now_dist < pre_dist and enemy.HP > 0:
                                 target = enemy
                                 target_id = enemy_id
                                 pre_dist = now_dist
                         if target is not None:
-                            target.HP(target.HP() - (OriginalBuildingAttribute[BuildingType.Bool]
-                                                     [BuildingAttribute.ORIGINAL_ATTACK] * tech_factor))
-                            self.instruments[flag]['attack'].append((building.Unit_ID(), target_id))
+                            target.HP = target.HP - (OriginalBuildingAttribute[BuildingType.Bool]
+                                                   [BuildingAttribute.ORIGINAL_ATTACK] * tech_factor)
+                            self.instruments[flag]['attack'].append((building.Unit_ID, target_id))
 
                 # Ohm Attack , 同时击中V和C伤害加3倍（即乘4倍），攻击最近单位
                 if building.BuildingType == BuildingType.Ohm:
@@ -674,16 +687,16 @@ class GameMain:
     def clean_up_phase(self):
         """Remove the destroyed units and towers"""
         for flag in range(2):
-            for unit_id, unit in self.units[flag].items():
+            for unit_id, unit in self.units[flag].copy().items():
                 if unit.HP <= 0:
                     self.units[flag].pop(unit_id)
-            for building in self.buildings[flag]['produce']:
+            for building in self.buildings[flag]['produce'].copy():
                 if building.HP <= 0:
                     self.buildings[flag]['produce'].remove(building)
-            for building in self.buildings[flag]['defence']:
+            for building in self.buildings[flag]['defence'].copy():
                 if building.HP <= 0:
                     self.buildings[flag]['defence'].remove(building)
-            for building in self.buildings[flag]['resource']:
+            for building in self.buildings[flag]['resource'].copy():
                 if building.HP <= 0:
                     self.buildings[flag]['resource'].remove(building)
 
@@ -728,9 +741,9 @@ class GameMain:
                         if can_move:
                             if _map[unit.Position.x + direction][unit.Position.y] == 1:
                                 # Position need to be changed.
-                                unit.Position.x += direction
+                                unit.Position = unit.Position.x + direction, unit.Position.y
                             elif _map[unit.Position.x][unit.Position.y + direction] == 1:
-                                unit.Position.y += direction
+                                unit.Position = unit.Position.x, unit.Position.y + direction
                         else:
                             break
                     self.instruments[current_flag]['move'].append(
@@ -775,7 +788,7 @@ class GameMain:
                             UnitType.PRODUCTION_BUILDING):
                         self.buildings[current_flag]['produce'].append(
                             Building(building_name, building_pos, current_flag, total_id, False,
-                                     self.status[current_flag]['tech'],produce_pos)
+                                     self.status[current_flag]['tech'], produce_pos)
                             )
                     elif (OriginalBuildingAttribute[construct_instrument[0]][BuildingAttribute.BUILDING_TYPE] ==
 
@@ -974,6 +987,7 @@ class GameMain:
         self.judge_winnner()
 
         self.debug_print()
+
 
 def main():
     game = GameMain()

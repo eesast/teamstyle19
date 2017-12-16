@@ -379,9 +379,9 @@ class Solider(object):
         return self.__Position
 
     @Position.setter
-    def Position(self,x,y):
-        Position.x = x
-        Position.y = y
+    def Position(self, z):
+        Position.x = z[0]
+        Position.y = z[1]
 
     @property
     def Flag(self):
