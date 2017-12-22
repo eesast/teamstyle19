@@ -12,7 +12,7 @@ class GameMain:
     for i in range(_map_size):
         _map.append([0 for j in range(_map_size)])
     turn_num = 0
-    winner = 3
+    winner = 2
     total_id = 0
 
     units = [{} for _ in range(2)]
@@ -340,32 +340,33 @@ class GameMain:
         self.init_map_random()
 
     def judge_winnner(self):
+        print("judge，回合：",self.turn_num);
         if self.turn_num == Inf:
 
             if self.main_base[0].HP > self.main_base[1].HP:
-                self.winner = 1
+                self.winner = 0
             elif self.main_base[0].HP < self.main_base[1].HP:
-                self.winner = 2
+                self.winner = 1
             elif self.status[0]['tech'] > self.status[1]['tech']:
-                self.winner = 1
+                self.winner = 0
             elif self.status[0]['tech'] < self.status[1]['tech']:
-                self.winner = 2
+                self.winner = 1
             elif len(self.units[0]) > len(self.units[1]):
-                self.winner = 1
+                self.winner = 0
             elif len(self.units[0]) < len(self.units[1]):
-                self.winner = 2
-            elif self.status[0]['money'] > self.status[1]['money']:
                 self.winner = 1
+            elif self.status[0]['money'] > self.status[1]['money']:
+                self.winner = 0
             elif self.status[0]['money'] < self.status[1]['money']:
-                self.winner = 2
+                self.winner = 1
             else:
-                self.winner = 3
-        elif self.main_base[0].blood == 0 and self.main_base[1].blood != 0:
+                self.winner = 2
+        elif self.main_base[0].HP == 0 and self.main_base[1].HP != 0:
+            self.winner = 0
+        elif self.main_base[1].HP == 0 and self.main_base[0].HP != 0:
             self.winner = 1
-        elif self.main_base[1].blood == 0 and self.main_base[0].blood != 0:
-            self.winner = 2
         else:
-            self.winner = 3
+            self.winner = 2
 
     def check_legal(self):
         """Remove the repeated instruments, or instruments on the wrong units"""
