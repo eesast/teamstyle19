@@ -651,8 +651,7 @@ class GameMain:
                             now_dist_y = 0 if unit.Position.y <= 6 else unit.Position.x - 6
                         now_dist = now_dist_x + now_dist_y
                         if now_dist < pre_dist and self.main_base[1 - flag].HP > 0:
-                            pass
-                            # target = self.main_base[1 - flag]
+                            target = self.main_base[1 - flag]
                     if target is not None:
                         target.HP = (target.HP - OriginalSoliderAttribute[unit.Solider_Name][
                                           SoliderAttr.SOLIDER_ORIGINAL_ATTACK] * tech_factor)
