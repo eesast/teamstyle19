@@ -361,9 +361,9 @@ class GameMain:
                 self.winner = 1
             else:
                 self.winner = 2
-        elif self.main_base[0].HP == 0 and self.main_base[1].HP != 0:
+        elif self.main_base[0].HP <= 0 and self.main_base[1].HP != 0:
             self.winner = 0
-        elif self.main_base[1].HP == 0 and self.main_base[0].HP != 0:
+        elif self.main_base[1].HP <= 0 and self.main_base[0].HP != 0:
             self.winner = 1
         else:
             self.winner = 2
@@ -472,9 +472,9 @@ class GameMain:
 
                 # Ohm Attack , 同时击中V和C伤害加3倍（即乘4倍），攻击最近单位
                 if building.BuildingType == BuildingType.Ohm:
-                    building.CD -= 1
-                    if building.CD <= 0:
-                        building.CD = OriginalBuildingAttribute[BuildingType.Ohm][BuildingAttribute.CD]
+                    building.CD_left = building.CD_left - 1
+                    if building.CD_left <= 0:
+                        building.CD_left = OriginalBuildingAttribute[BuildingType.Ohm][BuildingAttribute.CD]
                         pre_dist = OriginalBuildingAttribute[BuildingType.Ohm][BuildingAttribute.ORIGINAL_RANGE] + 1
                         target = None
                         for enemy_id, enemy in self.units[1 - flag].items():
@@ -509,6 +509,7 @@ class GameMain:
                 if building.BuildingType == BuildingType.Mole:
                     pre_dist = OriginalBuildingAttribute[BuildingType.Bool][BuildingAttribute.ORIGINAL_RANGE] + 1
                     target = None
+                    target_id = -1
                     find_last = False
                     # 查找上一个攻击目标是否还在攻击范围内
                     for enemy_id, enemy in self.units[1 - flag].items():
@@ -516,6 +517,7 @@ class GameMain:
                                         abs(enemy.Position.x - building.Position.x) +
                                         abs(enemy.Position.y - building.Position.y) < pre_dist):
                             target = enemy
+                            target_id = building.last_target_id
                             building.mult_factor *= 2
                             find_last = True
                             break
@@ -536,9 +538,9 @@ class GameMain:
 
                 # Monte_Carlo Attack,0-2之间随机数
                 if building.BuildingType == BuildingType.Monte_Carlo:
-                    building.CD -= 1
-                    if building.CD <= 0:
-                        building.CD = OriginalBuildingAttribute[BuildingType.Monte_Carlo][BuildingAttribute.CD]
+                    building.CD_left = building.CD_left - 1
+                    if building.CD_left <= 0:
+                        building.CD_left = OriginalBuildingAttribute[BuildingType.Monte_Carlo][BuildingAttribute.CD]
                         pre_dist = OriginalBuildingAttribute[BuildingType.Monte_Carlo][
                                        BuildingAttribute.ORIGINAL_RANGE] + 1
                         target = None
@@ -598,15 +600,16 @@ class GameMain:
                             pre_dist = now_dist
                     if target is not None:
                         persent = 0.1 * tech_factor
-                        target.HP = (target.HP - OriginalSoliderAttribute[target.SoliderName][
+                        target.HP = (target.HP - OriginalSoliderAttribute[target.Solider_Name][
                             SoliderAttr.SOLIDER_ORIGINAL_HP] * persent)
                         self.instruments[flag]['attack'].append((building.Unit_ID, target_id))
 
                 # Hawkin Attack,秒杀一格
                 if building.BuildingType == BuildingType.Hawkin:
-                    building.CD -= 1
-                    if building.CD <= 0:
-                        building.CD = OriginalBuildingAttribute[BuildingType.Hawkin][BuildingAttribute.CD]
+                    building.CD_left = building.CD_left - 1
+                    if building.CD_left <= 0:
+
+                        building.CD_left = OriginalBuildingAttribute[BuildingType.Hawkin][BuildingAttribute.CD]
                         pre_dist = OriginalBuildingAttribute[BuildingType.Hawkin][BuildingAttribute.ORIGINAL_RANGE] + 1
                         target = None
                         for enemy_id, enemy in self.units[1 - flag].items():
@@ -629,7 +632,17 @@ class GameMain:
             for unit_id, unit in self.units[flag].items():
                 action_mode = OriginalSoliderAttribute[unit.Solider_Name][SoliderAttr.ACTION_MODE]
                 pre_dist = OriginalSoliderAttribute[unit.Solider_Name][SoliderAttr.ATTACK_RANGE] + 1
-
+                if unit.Solider_Name == SoliderName.TURNING_MACHINE or unit.Solider_Name == SoliderName.ULTRON:
+                    can_attack = True
+                    for enemy_building in self.buildings[1 - flag]["defence"]:
+                        if enemy_building.BuildingType == BuildingType.Musk and \
+                            abs(unit.Position.x - enemy_building.Position.x) \
+                            + abs(unit.Position.y - enemy_building.Position.y) \
+                            < OriginalBuildingAttribute[BuildingType.Musk][BuildingAttribute.ORIGINAL_RANGE]:
+                            can_attack = False
+                            break
+                    if not can_attack:
+                        continue
                 # 推塔式与抗线式兵种的攻击
                 if action_mode == ActionMode.BUILDING_ATTACK or action_mode == ActionMode.MOVING_ATTACK:
                     target = None
@@ -659,7 +672,7 @@ class GameMain:
 
                 # 冲锋式兵种的攻击
                 else:
-                    if flag:
+                    if not flag:
                         now_dist_x = 0 if unit.Position.x >= 193 else 193 - unit.Position.x
                         now_dist_y = 0 if unit.Position.y >= 193 else 193 - unit.Position.x
                     else:
@@ -667,7 +680,7 @@ class GameMain:
                         now_dist_y = 0 if unit.Position.y <= 6 else unit.Position.x - 6
                     now_dist = now_dist_x + now_dist_y
                     if now_dist < pre_dist and self.main_base[1 - flag].HP > 0:
-                        self.main_base[1 - flag].HP -= (OriginalSoliderAttribute[unit.SoliderName][
+                        self.main_base[1 - flag].HP -= (OriginalSoliderAttribute[unit.Solider_Name][
                                                             SoliderAttr.SOLIDER_ORIGINAL_ATTACK] * tech_factor)
                         unit.HP = -1
                         self.instruments[flag]['attack'].append((unit_id, self.main_base[1 - flag].Unit_ID))
@@ -983,8 +996,9 @@ class GameMain:
             for unit_id, unit in self.units[flag].items():
                 line = "ID:" + str(unit_id) + " Type:" + str(int(unit.Solider_Name)) \
                       + " Position:" + str(unit.Position.x) + ' ' + str(unit.Position.y) \
-                      + " Attack" + str(OriginalSoliderAttribute[unit.Solider_Name][
-                                SoliderAttr.SOLIDER_ORIGINAL_ATTACK] * tech_factor) + '\n'
+                      + " Attack:" + str(OriginalSoliderAttribute[unit.Solider_Name][
+                                SoliderAttr.SOLIDER_ORIGINAL_ATTACK] * tech_factor) \
+                      + " HP:" + str(unit.HP) + '\n'
                 with open("debug.txt", "a") as out:
                     out.write(line)
     def next_tick(self):
