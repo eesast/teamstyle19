@@ -45,7 +45,7 @@ print_count = 0
 
 f = open("debug.txt", 'w')
 f.close()
-while game.winner == 3:
+while game.winner == 2:
     # 由于未写通信模块，故每回合指令写入txt中，随后自动逐行读取
 
     line = read_file.readline()

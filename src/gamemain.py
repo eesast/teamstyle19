@@ -12,7 +12,7 @@ class GameMain:
     for i in range(_map_size):
         _map.append([0 for j in range(_map_size)])
     turn_num = 0
-    winner = 3
+    winner = 2
     total_id = 0
 
     units = [{} for _ in range(2)]
@@ -340,6 +340,7 @@ class GameMain:
         self.init_map_random()
 
     def judge_winnner(self):
+        print("judge，回合：",self.turn_num);
         if self.turn_num == Inf:
 
             if self.main_base[0].HP > self.main_base[1].HP:
