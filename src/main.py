@@ -39,6 +39,9 @@ if len(sys.argv) > 1:
 
 read_file = open("test.txt", 'r')
 game = GameMain()
+game.map_save()
+with open('turn_save.txt','w') as f:
+    pass    #清空文件
 print('start')
 file = []
 print_count = 0
