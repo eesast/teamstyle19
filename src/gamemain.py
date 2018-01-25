@@ -1051,7 +1051,7 @@ class GameMain:
             f.write(jmap)
 
     def turn_save(self):
-        junits = [{} for _ in range(2)]
+        junits = [[] for _ in range(2)]
         jbuildings = [{
             'produce': [],
             'defence': [],
@@ -1075,19 +1075,24 @@ class GameMain:
         } for _ in range(2)]
         for i in range (2):
             for unit_id,unit in self.units[i].items():
-                junits[i][unit_id]=(str(unit.Solider_Name), unit.HP,(unit.Position.x,unit.Position.y) , unit.Flag, unit.Unit_ID)
+                unit_temp={'name':str(unit.Solider_Name),'hp':unit.HP,'pos':(unit.Position.x,unit.Position.y),'flag':unit.Flag,'id':unit.Unit_ID}
+                junits[i].append(unit_temp)
             for building in self.buildings[i]['produce']:
-                jbuildings[i]['produce'].append(((
-                    str(building.BuildingType), building.HP, (building.Position.x,building.Position.y), building.Flag, building.Unit_ID,
-                     building.Is_Maintain, building.level),(building.ProducePos.x,building.ProducePos.y)))
+                building_temp={'type':str(building.BuildingType),'pos':(building.Position.x,building.Position.y),'hp':building.HP,'flag':building.Flag,'id':building.Unit_ID,
+                               'maintain':building.Is_Maintain,'level':building.level,'pro_pos':(building.ProducePos.x,building.ProducePos.y)}
+                jbuildings[i]['produce'].append(building_temp)
             for building in self.buildings[i]['defence']:
-                jbuildings[i]['defence'].append(
-                    (str(building.BuildingType), building.HP, (building.Position.x,building.Position.y), building.Flag, building.Unit_ID,
-                     building.Is_Maintain, building.level,(building.ProducePos.x,building.ProducePos.y)))
+                building_temp = {'type': str(building.BuildingType), 'pos': (building.Position.x, building.Position.y),
+                                 'hp': building.HP, 'flag': building.Flag, 'id': building.Unit_ID,
+                                 'maintain': building.Is_Maintain, 'level': building.level,
+                                 'pro_pos': (building.ProducePos.x, building.ProducePos.y)}
+                jbuildings[i]['defence'].append(building_temp)
             for building in self.buildings[i]['resource']:
-                jbuildings[i]['resource'].append(
-                    (str(building.BuildingType), building.HP, (building.Position.x,building.Position.y), building.Flag, building.Unit_ID,
-                     building.Is_Maintain, building.level,(building.ProducePos.x,building.ProducePos.y)))
+                building_temp = {'type': str(building.BuildingType), 'pos': (building.Position.x, building.Position.y),
+                                 'hp': building.HP, 'flag': building.Flag, 'id': building.Unit_ID,
+                                 'maintain': building.Is_Maintain, 'level': building.level,
+                                 'pro_pos': (building.ProducePos.x, building.ProducePos.y)}
+                jbuildings[i]['resource'].append(building_temp)
             jstatus[i]=self.status[i]
             jinstruments[i]['attack']=self.instruments[i]['attack']
             for id,pos in self.instruments[i]['move']:
@@ -1113,15 +1118,9 @@ class GameMain:
             jinstruments[i]['resource']=self.instruments[i]['resource']
         #jinstruments=self.instruments
 
-
-        data=JSONEncoder().encode(junits)
-        data=JSONEncoder().encode(jbuildings)
-        data=JSONEncoder().encode(jstatus)
-        data=JSONEncoder().encode(jinstruments)
-
-        data = junits + jbuildings + jstatus + jinstruments
+        data={'unit_0':junits[0],'unit_1':junits[1],'buildings_0':jbuildings[0],'buildings_1':jbuildings[1],'status_0':jstatus[0],
+              'status_1':jstatus[1],'instruments_0':jinstruments[0],'instruments_1':jinstruments[1]}
         jdata = JSONEncoder().encode(data)
-        print(self.buildings,self.units)
         with open('turn_save.txt', 'a') as f:
             f.write(jdata)
             f.write('\n')
