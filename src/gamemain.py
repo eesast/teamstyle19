@@ -1096,9 +1096,13 @@ class GameMain:
             jstatus[i]=self.status[i]
             jinstruments[i]['attack']=self.instruments[i]['attack']
             for id,pos in self.instruments[i]['move']:
-                jinstruments[i]['move'].append((id,(pos.x,pos.y)))
+                jinstruments[i]['move'].append({'id':id,'pos':(pos.x,pos.y)})
             for building in self.instruments[i]['construct']:
-                jinstruments[i]['construct'].append((building[0],(building[1][0],building[1][1])))
+                construct_temp = {'type':building[0],'pos':(building[1][0],building[1][1])}
+                if building[0] < 9 and building[0] > 0:
+                    produce_pos = (building[2][0],building[2][1])
+                    construct_temp['pro_pos']=produce_pos
+                jinstruments[i]['construct'].append(construct_temp)
             '''for building in self.instruments[i]['maintain']:
                 jinstruments[i]['maintain'].append((
                     str(building.BuildingType), building.HP, (building.Position.x,building.Position.y), building.Flag, building.Unit_ID,
