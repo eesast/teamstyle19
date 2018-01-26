@@ -1098,7 +1098,7 @@ class GameMain:
             for id,pos in self.instruments[i]['move']:
                 jinstruments[i]['move'].append({'id':id,'pos':(pos.x,pos.y)})
             for building in self.instruments[i]['construct']:
-                construct_temp = {'type':building[0],'pos':(building[1][0],building[1][1])}
+                construct_temp = {'type':str(building[0]),'pos':(building[1][0],building[1][1])}
                 if building[0] < 9 and building[0] > 0:
                     produce_pos = (building[2][0],building[2][1])
                     construct_temp['pro_pos']=produce_pos
