@@ -27,7 +27,7 @@ class GameMain:
 
     status = [{
         'money': 10000,
-        'tech': 3,
+        'tech': 1,
         'building': 0,
     } for _ in range(2)]
 
@@ -59,10 +59,10 @@ class GameMain:
 
         # 生成基地，位置定在0,0和199,199处
         self.main_base[0] = Building(BuildingType.Base, Position(0, 0), 0, self.total_id,
-                                     False, 0 ,Position(0, 0))
+                                     False, 1 ,Position(0, 0))
         self.total_id += 1
         self.main_base[1] = Building(BuildingType.Base, Position(199, 199), 1, self.total_id,
-                                     False, 0, Position(199, 199))
+                                     False, 1, Position(199, 199))
         self.total_id += 1
         for i in range(7):
             for j in range(7):
@@ -953,61 +953,35 @@ class GameMain:
             out.write(line)
 
         with open("debug.txt", "a", encoding="utf8") as out:
-            out.write("输出主基地血量\n")
+            out.write("\t输出主基地血量\n")
         for flag in range(2):
-            line = "flag:" + str(flag) + " HP:" + str(self.main_base[flag].HP) + '\n'
+            line = "\t\tflag:" + str(flag) + " HP:" + str(self.main_base[flag].HP) + '\n'
             with open("debug.txt", "a") as out:
                 out.write(line)
-        # print('输出status中的信息')
-        # for flag in range(2):
-        #     print('flag:',flag)
-        #     for sta_type, sta_of_type in self.status[flag].items():
-        #         print(sta_type, ':', sta_of_type)
-        # print('输出raw_ins中的信息')
-        # for flag in range(2):
-        #     print('flag:', flag)
-        #     for ins_type, ins_of_type in self.raw_instruments[flag].items():
-        #         print(ins_type, end=':')
-        #         if type(ins_of_type) != bool:
-        #             for ins in ins_of_type:
-        #                 print(ins, end=' ')
-        #             print()
-        #         else:
-        #             print(ins_of_type)
-        # print('输出ins中的信息')
-        # for flag in range(2):
-        #     print('flag:', flag)
-        #     for ins_type, ins_of_type in self.instruments[flag].items():
-        #         print(ins_type, end=':')
-        #         if type(ins_of_type) != bool:
-        #             for ins in ins_of_type:
-        #                 print(ins, end=' ')
-        #             print()
-        #         else:
-        #             print(ins_of_type)
+
         with open("debug.txt", "a", encoding="utf8") as out:
-            out.write('输出building中的信息\n')
+            out.write('\t输出building中的信息\n')
         for flag in range(2):
-            line = 'flag:' + str(flag) + '\n'
+            line = '\t\tflag:' + str(flag) + '\n'
             with open("debug.txt", "a") as out:
                 out.write(line)
             for building_type,buildings_of_type in self.buildings[flag].items():
                 for building in buildings_of_type:
-                    line = "ID:" + str(building.Unit_ID) + " Type:" + str(int(building.BuildingType)) \
+                    line = "\t\t\tID:" + str(building.Unit_ID) + " Type:" + str(int(building.BuildingType)) \
                           + " Position:" + str(building.Position.x) + ' ' + str(building.Position.y) \
                           + " HP:" + str(building.HP) + '\n'
                     with open("debug.txt", "a") as out:
                         out.write(line)
 
         with open("debug.txt", "a", encoding="utf8") as out:
-            out.write('输出unit中的信息\n')
+            out.write('\t输出unit中的信息\n')
         for flag in range(2):
-            line = 'flag:' + str(flag) + '\n'
+            line = '\t\tflag:' + str(flag) + '\n'
             with open("debug.txt", "a") as out:
                out.write(line)
             tech_factor = 0.5 * (self.status[flag]['tech'] + 2)
             for unit_id, unit in self.units[flag].items():
-                line = "ID:" + str(unit_id) + " Type:" + str(int(unit.Solider_Name)) \
+                line = "\t\t\tID:" + str(unit_id) + " Type:" + str(int(unit.Solider_Name)) \
                       + " Position:" + str(unit.Position.x) + ' ' + str(unit.Position.y) \
                       + " Attack:" + str(OriginalSoliderAttribute[unit.Solider_Name][
                                 SoliderAttr.SOLIDER_ORIGINAL_ATTACK] * tech_factor) \
