@@ -27,7 +27,7 @@ class GameMain:
 
     status = [{
         'money': 10000,
-        'tech': 1,
+        'tech': 3,
         'building': 0,
     } for _ in range(2)]
 
@@ -376,14 +376,22 @@ class GameMain:
                 if instrument_type == 'update_age':
                     continue
                 # 去重，并保持原来指令次序
-                del_repeat = lambda x, y: x if y in x else x + [y]
-                new_instrument_list = reduce(del_repeat, [[], ] + instrument_list)
-
+                # del_repeat = lambda x, y: x if y in x else x + [y]
+                # new_instrument_list = reduce(del_repeat, [[], ] + instrument_list)
+                new_instrument_list = instrument_list
                 if instrument_type == 'construct':
-                    for instrument in new_instrument_list.copy():
+                    for instrument in new_instrument_list:
                         building_type = instrument[0]
-                        new_construct_pos = Position(*instrument[1])
-                        new_produce_pos = Position(*instrument[2])
+
+                        new_construct_pos = Position(instrument[1][0],instrument[1][1])
+
+                        # 生产建筑必须指定正确的生产位置
+                        if building_type >0 and building_type <9:
+                            print("*******", instrument[2][0])
+                            if len(instrument) <2:
+                                new_instrument_list.remove(instrument)
+                                continue
+                            new_produce_pos = Position(instrument[2][0],instrument[2][1])
                         # 判断建造时代是否符合要求
                         if (OriginalBuildingAttribute[BuildingType(building_type)][BuildingAttribute.AGE].value >
                                 self.status[current_flag]['tech']):
@@ -394,13 +402,15 @@ class GameMain:
                                     self._map[new_construct_pos.x][new_construct_pos.y] == 2):
                             new_instrument_list.remove(instrument)
                             continue
-                        building_range = 2  # 建造范围未定，暂设为2
+                        building_range = 8  # 建造范围未定，暂设为8
                         can_build = False
                         count = 0
                         for building_list in self.buildings[current_flag].values():
                             if not building_list:
                                 count += 1
                             if count == 3:
+                                can_build = True
+                            if new_construct_pos.x - current_flag * (self._map_size -1) <= 10:
                                 can_build = True
                             for building in building_list:
                                 if (abs(building.Position.x - new_construct_pos.x) +
@@ -793,6 +803,8 @@ class GameMain:
                         age_increase_factor)
                     if building_name < 9 and building_name >0:
                         produce_pos = Position(*construct_instrument[2])
+                    else:
+                        produce_pos = None
 
                     # Ignore the instruments that spend too much.
                     if (self.status[current_flag]['money'] < money_cost and
@@ -952,6 +964,10 @@ class GameMain:
         with open("debug.txt", "a", encoding="utf8") as out:
             out.write(line)
 
+        line = "\t指令:" + str(self.raw_instruments) + '\n'
+        with open("debug.txt", "a", encoding="utf8") as out:
+            out.write(line)
+
         with open("debug.txt", "a", encoding="utf8") as out:
             out.write("\t输出主基地血量\n")
         for flag in range(2):
@@ -994,7 +1010,7 @@ class GameMain:
         self.attack_phase()
         self.clean_up_phase()
         self.move_phase()
-        # self.check_legal()
+        self.check_legal()
         self.building_phase()
         self.produce_phase()
         self.update_age_phase()
