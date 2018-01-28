@@ -107,7 +107,7 @@ class ActionMode(IntEnum):
 OriginalBuildingAttribute = {
 
     BuildingType.Base: {BuildingAttribute.BUILDING_TYPE: UnitType.Base,
-                        BuildingAttribute.ORIGINAL_HP: 10000, BuildingAttribute.ORIGINAL_ATTACK: None,
+                        BuildingAttribute.ORIGINAL_HP: 100000, BuildingAttribute.ORIGINAL_ATTACK: None,
                         BuildingAttribute.ORIGINAL_RANGE: 0, BuildingAttribute.TRAGET: None,
                         BuildingAttribute.AGE: None, BuildingAttribute.ORIGINAL_RESOURCE: None,
                         BuildingAttribute.ORIGINAL_BUILDING_POINT: None, BuildingAttribute.AOE: None,
