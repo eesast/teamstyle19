@@ -10,5 +10,5 @@ extern bool** map;
 extern bool flag;
 void f_player()
 {
-	//start at here;
+	//player start at here;
 };

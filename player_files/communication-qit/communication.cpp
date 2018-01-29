@@ -4,7 +4,7 @@
 #include<sstream>
 #include<regex>
 #include<vector>
-#include"D://teamstyle19/player_files/api_player.h"
+#include"api_player.h"
 
 using namespace std;
 
@@ -13,7 +13,7 @@ MyClient::MyClient()
 	//设置socket的基本参数
 	WSAStartup(MAKEWORD(2, 2), &wsaData);
 	sockClient = socket(AF_INET, SOCK_STREAM, 0);
-	addrServer.sin_addr.S_un.S_addr = inet_addr("127.0.0.1");
+	addrServer.sin_addr.S_un.S_addr = inet_addr("127.0.0.1"); 
 	addrServer.sin_family = AF_INET;
 	addrServer.sin_port = htons(9999);
 }
@@ -87,7 +87,6 @@ void MyClient::send_command(bool _update, vector<command1> &v1, vector<command2>
 	if (msg == NULL)
 		return;
 	char* hello = "start";
-	//char* command = "1,2 1,3 1,6 7,2 9 0 0,3 2,1 1 1 1";
 	int len = strlen(msg);
 	stringstream s;
 	s << len;
@@ -102,7 +101,6 @@ void MyClient::send_command(bool _update, vector<command1> &v1, vector<command2>
 	for (; left > 0; left--)
 		s << '#';
 	const char* c = s.str().c_str();
-//	cout << "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA" << s.str().c_str() << "!!!!!!!!!!!!!!!!!!!!!!!!!" << endl;
 	send(sockClient, hello, strlen(hello), 0);
 	send(sockClient, s.str().c_str(), 10, 0);
 	send(sockClient, msg, strlen(msg), 0);
@@ -175,12 +173,12 @@ State* MyClient::recv_state()
 		iis >> temp;
 		int building_point;
 		iis >> building_point;
-	//	cout << building_point;
-		Resource _resource(building_point, building_resource);
-		state->resource[i] = _resource;
-	//	cout << i<<"!!!"<<state->resource[i].building_point << state->resource[i].resource << endl;
+		//cout << building_point;
+		_resource temp_resource(building_point, building_resource);
+		state->resource[i] = temp_resource;
+		//cout << i<<"!!!"<<state->resource[i].building_point << state->resource[i].resource << endl;
 		state->age[i] = (Age)int_age;
-	//	cout << i << "!!" << state->age[i] << endl;
+		//cout << i << "!!" << state->age[i] << endl;
 	}
 	
 	//将building实例化
@@ -207,7 +205,7 @@ State* MyClient::recv_state()
 			BuildingType q;
 			q = (BuildingType)building_type;
 			state->building[i].push_back(Building(q, hp, Position(posx, posy), i, unit_id, bool_main));
-	//		cout << q << " " << hp << " " << posx << " " << posy << " " <<i << " " << unit_id << " " << bool_main << endl;
+			//cout << q << " " << hp << " " << posx << " " << posy << " " <<i << " " << unit_id << " " << bool_main << endl;
 		}
 	}
 	int solider_name;

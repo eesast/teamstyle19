@@ -1,16 +1,25 @@
 #pragma once
 #include<WinSock2.h>
 #pragma comment(lib,"ws2_32.lib")
-#include"D://teamstyle19/player_files/api_player.h"
+#include"api_player.h"
 #define _mapsize 200
 #include<vector>
 using namespace std;
+
+struct _resource
+{
+	int building_point;
+	int resource;
+	_resource(int building_point=-1, int resource=-1) :building_point(building_point), resource(resource) {}
+};
+
+
 
 struct State
 {
 	int turn;
 	int winner;
-	Resource resource[2];
+	_resource resource[2];
 	Age age[2];
 	vector<Building> building[2];
 	vector<Solider> solider[2];

@@ -32,31 +32,43 @@ void Listen()
 
 int main()
 {
-	/*for (int i = 0; i < 10; i++)
+	for (int i = 0; i < 50; i++)
 		c1.push_back(command1(i, 3));
-	for (int i = 0; i < 10; i++)
-		c2.push_back(command2(6, i + 10, 4, 4, 5, 5));*/ //测试用的
+	for (int i = 0; i < 50; i++)
+		c2.push_back(command2(6, i + 10, 4, 4, 5, 5)); //测试用的
 	cilent.start_connection();
 	map = cilent.map;
 	flag = cilent.flag;
 	int turn = 0;
 	thread th_communication(Listen);
 	//State* state;
-	while (turn++ < 1000)
+	while (state == NULL)
+	{
+
+	}
+	State* laststate = NULL;
+	while (state->turn < 1000)
 	{
 		if (state == NULL)
 			continue;
+		if (state == laststate)
+			continue;
+		laststate = state;
+		if (state->turn == 30)
+		{
+			int ee;
+			cin >> ee;
+		}
+		cout << "********************"<<state->turn <<"****************************"<< endl;
 		if (state->winner != 3)//出现了胜利者
 			break;
 		f_player();
 		cilent.send_command(_updateAge,c1,c2);
 		_updateAge = false;
-		c1.clear();//注 如果f_player()是空的 最好去掉clear 否则会发空指令 没意义
+		//c1.clear();//注 如果f_player()是空的 最好去掉clear 否则会发空指令 没意义
 		c2.clear();
 		Sleep(100);
-	
-		//cout <<"######################"<<state->turn <<"###############################"<< endl;
-		//cout << state->age[0] << endl;
+		cout << "********************************************************" << endl;
 	}
 	if (state->winner == 1)
 		cout << "Winner is 1" << endl;

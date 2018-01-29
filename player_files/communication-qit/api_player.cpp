@@ -1,4 +1,4 @@
-#include"D://teamstyle19/player_files/api_player.h"
+#include"api_player.h"
 #include<vector>
 #include"communication.h"
 using namespace std;
