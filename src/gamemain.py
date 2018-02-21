@@ -339,8 +339,8 @@ class GameMain:
     def __init__(self):
         self.init_map_random()
 
-    def judge_winnner(self):
-        print("judge，回合：",self.turn_num);
+    def judge_winner(self):
+        #print("judge，回合：",self.turn_num);
         if self.turn_num == Inf:
 
             if self.main_base[0].HP > self.main_base[1].HP:
@@ -351,20 +351,25 @@ class GameMain:
                 self.winner = 0
             elif self.status[0]['tech'] < self.status[1]['tech']:
                 self.winner = 1
-            elif len(self.units[0]) > len(self.units[1]):
+            elif len(self.buildings[0]) > len(self.buildings[1]) :
                 self.winner = 0
-            elif len(self.units[0]) < len(self.units[1]):
+            elif len(self.buildings[0]) < len(self.buildings[1]) :
                 self.winner = 1
             elif self.status[0]['money'] > self.status[1]['money']:
                 self.winner = 0
             elif self.status[0]['money'] < self.status[1]['money']:
                 self.winner = 1
+            elif len(self.units[0]) > len(self.units[1]):
+                self.winner = 0
+            elif len(self.units[0]) < len(self.units[1]):
+                self.winner = 1
             else:
                 self.winner = 2
-        elif self.main_base[0].HP <= 0 and self.main_base[1].HP != 0:
-            self.winner = 0
-        elif self.main_base[1].HP <= 0 and self.main_base[0].HP != 0:
+
+        elif self.main_base[0].HP <= 0 and self.main_base[1].HP > 0:
             self.winner = 1
+        elif self.main_base[1].HP <= 0 and self.main_base[0].HP > 0:
+            self.winner = 0
         else:
             self.winner = 2
 
@@ -1004,21 +1009,25 @@ class GameMain:
                       + " HP:" + str(unit.HP) + '\n'
                 with open("debug.txt", "a") as out:
                     out.write(line)
+
     def next_tick(self):
         """回合演算与指令合法性判断"""
-        self.turn_num += 1
-        self.attack_phase()
-        self.clean_up_phase()
-        self.move_phase()
-        self.check_legal()
-        self.building_phase()
-        self.produce_phase()
-        self.update_age_phase()
-        self.resource_phase()
-        # self.update_id()
-        self.judge_winnner()
+        if(self.turn_num < Inf):
+            self.turn_num += 1
+            '''self.attack_phase()
+            self.clean_up_phase()
+            self.move_phase()
+            self.check_legal()
+            self.building_phase()
+            self.produce_phase()
+            self.update_age_phase()
+            self.resource_phase()
+            # self.update_id()'''
+            self.judge_winner()
 
-        self.debug_print()
+            self.debug_print()
+        elif (self.turn_num == Inf):
+            self.judge_winner()
 
 
 def main():
