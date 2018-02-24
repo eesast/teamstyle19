@@ -122,7 +122,7 @@ const int OriginalBuildingAttribute[Building_Type][Attr_Num] = {
     {DEFENSIVE_BUILDING,  225,  4,      35,   DATA,            PROCESSOR, 225,    25,    0,      1},
     {DEFENSIVE_BUILDING,  300,  25,     25,   SUBSTANCE,       ALGORITHM, 300,    30,    0,      2},
     {DEFENSIVE_BUILDING,  480,  5,      25,   ALL,             NETWORK,   480,    50,    2,      1},
-    {DEFENSIVE_BUILDING,  450, /*TODO*/,30,   DATA,            NETWORK,   450,    45,    0,      1},
+    {DEFENSIVE_BUILDING,  450, 5/*随便编的数字，为了让编译通过*/,30,   DATA,            NETWORK,   450,    45,    0,      1},
     {DEFENSIVE_BUILDING,  900,  0,      10,   ALL,             AI,        900,    90,    0,      1},
     {DEFENSIVE_BUILDING,  1500, INT_MAX,10,   ALL,             AI,        1500,   100,   1,      5},
 
@@ -165,10 +165,10 @@ struct Solider {
     int heal;
     Position pos;
     int flag;
-    int unit_id
+    int unit_id;
 
     Solider();
-    Solider(SoliderName solider_name, int heal, Position pos, int flag,int unit_id);
+	Solider(SoliderName solider_name, int heal, Position pos, int flag, int unit_id) :solider_name(solider_name),heal(heal),pos(pos),flag(flag),unit_id(unit_id){};
 };
 
 struct Building {
@@ -180,7 +180,7 @@ struct Building {
     bool maintain;
 
     Building();
-    Building(BuildingType building_type, int heal, Position pos, int flag, int unit_id, bool maintain);
+	Building(BuildingType building_type, int heal, Position pos, int flag, int unit_id, bool maintain):building_type(building_type),heal(heal),pos(pos),flag(flag),unit_id(unit_id),maintain(maintain) {};
 };
 
 //API for players
