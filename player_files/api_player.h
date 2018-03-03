@@ -29,7 +29,7 @@ enum BuildingType{
     //base
     __Base,
 
-    //buidings for producing
+    //buildings for producing
     Shannon,
     Thevenin,
     Norton,
@@ -61,7 +61,7 @@ enum BuildingAttribute {
                       //For resources buildings, it stands for Collective_Value
                       //For production buildings, it means nothing set as _NULL
 
-    ORGINAL_RANGE,    //FOr production buildings, it stands for the range of production,
+    ORIGINAL_RANGE,   //For production buildings, it stands for the range of production,
                       //For defensive buildings, it stands for the range of attacking
                       //For resource buildings, it means nothing
 
@@ -75,7 +75,7 @@ enum BuildingAttribute {
     Attr_Num          //For the definition of Array
 };
 
-enum SoliderName {
+enum SoldierName {
     BIT_STREAM,
     VOLTAGE_SOURCE,
     CURRENT_SOURCE,
@@ -84,17 +84,17 @@ enum SoliderName {
     OPTICAL_FIBER,
     TURING_MACHINE,
     ULTRON,
-    Solider_Type
+    Soldier_Type
 };
 
-enum SoliderAttr {
-    SOLIDER_TYPE,
+enum SoldierAttr {
+    SOLDIER_TYPE,
     ACTION_MODE,
-    SOLIDER_ORIGINAL_HEAL,
-    SOLIDER_ORIGINAL_ATTACK,
+    SOLDIER_ORIGINAL_HEAL,
+    SOLDIER_ORIGINAL_ATTACK,
     ATTACK_RANGE,
     SPEED,
-    Solider_Attr_Num  //For the definition of Array
+    Soldier_Attr_Num  //For the definition of Array
 };
 
 enum ActionMode {
@@ -129,7 +129,7 @@ const int OriginalBuildingAttribute[Building_Type][Attr_Num] = {
     {RESOURCE_BUILDING,            100,  50,     _NULL,_NULL,          _NULL,      _NULL,  _NULL, _NULL,  _NULL}
 };
 
-const int OriginalSoliderAttribute[Solider_Type][Solider_Attr_Num] = {
+const int OriginalSoldierAttribute[Soldier_Type][Soldier_Attr_Num] = {
     {DATA,      BUILDING_ATTACK,        10,     10,     8,      8},
     {SUBSTANCE, BUILDING_ATTACK,        30,     16,     12,     6},
     {SUBSTANCE, BASE_ATTACK,            30,     160,    1,      6},
@@ -160,14 +160,14 @@ struct Position {
     Position(int x = -1, int y = -1): x(x), y(y) {}
 };
 
-struct Solider {
-    SoliderName solider_name;
+struct Soldier {
+    SoldierName soldier_name;
     int heal;
     Position pos;
     int flag;
 
-    Solider();
-    Solider(SoliderName solider_name, int heal, Position pos, int flag);
+    Soldier();
+    Soldier(SoldierName soldier_name, int heal, Position pos, int flag);
 };
 
 struct Building {
@@ -184,7 +184,7 @@ struct Building {
 
 //API for players
 void updateAge();
-void construct(BuildingType building_type, Position pos, Position solider_pos); //The solier position is not set now
+void construct(BuildingType building_type, Position pos, Position soldier_pos); //The soldier position is not set now
 void upgrade(int unit_id);
 void sell(int unit_id);
 void toggleMaintain(int unit_id);

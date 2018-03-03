@@ -12,9 +12,9 @@ void updateAge()
     askUpdateAge = true;
 }
 
-void construct(BuildingType building_type, Position pos, Position solider_pos)
+void construct(BuildingType building_type, Position pos, Position soldier_pos)
 {
-    command_queue.push_back(Command(Construct, building_type, pos, solider_pos));
+    command_queue.push_back(Command(Construct, building_type, pos, soldier_pos));
 }
 
 void upgrade(int unit_id)

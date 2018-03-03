@@ -522,9 +522,9 @@ class GameMain:
                                         OriginalBuildingAttribute[BuildingType.Ohm][BuildingAttribute.AOE]):
                                     enemy.HP = (enemy.HP - (OriginalBuildingAttribute[BuildingType.Ohm]
                                                            [BuildingAttribute.ORIGINAL_ATTACK] * tech_factor))
-                                    if enemy.Solider_Name == SoliderName.VOLTAGE_SOURCE:
+                                    if enemy.Soldier_Name == SoldierName.VOLTAGE_SOURCE:
                                         hit_v = 1
-                                    if enemy.Solider_Name == SoliderName.CURRENT_SOURCE:
+                                    if enemy.Soldier_Name == SoldierName.CURRENT_SOURCE:
                                         hit_c = 1
                                 if hit_v and hit_c:
                                     for enemy_id, enemy in self.units[1 - flag].items():
@@ -595,11 +595,11 @@ class GameMain:
                         now_dist = abs(enemy.Position.x - building.Position.x) \
                                    + abs(enemy.Position.y - building.Position.y)
                         if now_dist < pre_dist and enemy.HP > 0:
-                            if (not hit_packet) or enemy.Solider_Name == SoliderName.PACKET:
+                            if (not hit_packet) or enemy.Soldier_Name == SoldierName.PACKET:
                                 target = enemy
                                 target_id = enemy_id
                                 pre_dist = now_dist
-                                if enemy.Solider_Name == SoliderName.PACKET:
+                                if enemy.Soldier_Name == SoldierName.PACKET:
                                     hit_packet = True
                     if target is not None:
                         target_x = target.Position.x
@@ -607,7 +607,7 @@ class GameMain:
                         for enemy_id, enemy in self.units[1 - flag].items():
                             if (abs(enemy.Position.x - target_x) + abs(enemy.Position.y - target_y) <
                                     OriginalBuildingAttribute[BuildingType.Larry_Roberts][BuildingAttribute.AOE]):
-                                if enemy.Solider_Name == SoliderName.PACKET:
+                                if enemy.Soldier_Name == SoldierName.PACKET:
                                     mult_factor = 3
                                 else:
                                     mult_factor = 1
@@ -628,8 +628,8 @@ class GameMain:
                             pre_dist = now_dist
                     if target is not None:
                         persent = 0.1 * tech_factor
-                        target.HP = (target.HP - OriginalSoliderAttribute[target.Solider_Name][
-                            SoliderAttr.SOLIDER_ORIGINAL_HP] * persent)
+                        target.HP = (target.HP - OriginalSoldierAttribute[target.Soldier_Name][
+                            SoldierAttr.SOLDIER_ORIGINAL_HP] * persent)
                         self.instruments[flag]['attack'].append((building.Unit_ID, target_id))
 
                 # Hawkin Attack,秒杀一格
@@ -658,9 +658,9 @@ class GameMain:
 
             # 兵种对建筑的攻击
             for unit_id, unit in self.units[flag].items():
-                action_mode = OriginalSoliderAttribute[unit.Solider_Name][SoliderAttr.ACTION_MODE]
-                pre_dist = OriginalSoliderAttribute[unit.Solider_Name][SoliderAttr.ATTACK_RANGE] + 1
-                if unit.Solider_Name == SoliderName.TURNING_MACHINE or unit.Solider_Name == SoliderName.ULTRON:
+                action_mode = OriginalSoldierAttribute[unit.Soldier_Name][SoldierAttr.ACTION_MODE]
+                pre_dist = OriginalSoldierAttribute[unit.Soldier_Name][SoldierAttr.ATTACK_RANGE] + 1
+                if unit.Soldier_Name == SoldierName.TURNING_MACHINE or unit.Soldier_Name == SoldierName.ULTRON:
                     can_attack = True
                     for enemy_building in self.buildings[1 - flag]["defence"]:
                         if enemy_building.BuildingType == BuildingType.Musk and \
@@ -694,8 +694,8 @@ class GameMain:
                         if now_dist < pre_dist and self.main_base[1 - flag].HP > 0:
                             target = self.main_base[1 - flag]
                     if target is not None:
-                        target.HP = (target.HP - OriginalSoliderAttribute[unit.Solider_Name][
-                                          SoliderAttr.SOLIDER_ORIGINAL_ATTACK] * tech_factor)
+                        target.HP = (target.HP - OriginalSoldierAttribute[unit.Soldier_Name][
+                                          SoldierAttr.SOLDIER_ORIGINAL_ATTACK] * tech_factor)
                         self.instruments[flag]['attack'].append((unit_id, target.Unit_ID))
 
                 # 冲锋式兵种的攻击
@@ -708,8 +708,8 @@ class GameMain:
                         now_dist_y = 0 if unit.Position.y <= 6 else unit.Position.x - 6
                     now_dist = now_dist_x + now_dist_y
                     if now_dist < pre_dist and self.main_base[1 - flag].HP > 0:
-                        self.main_base[1 - flag].HP -= (OriginalSoliderAttribute[unit.Solider_Name][
-                                                            SoliderAttr.SOLIDER_ORIGINAL_ATTACK] * tech_factor)
+                        self.main_base[1 - flag].HP -= (OriginalSoldierAttribute[unit.Soldier_Name][
+                                                            SoldierAttr.SOLDIER_ORIGINAL_ATTACK] * tech_factor)
                         unit.HP = -1
                         self.instruments[flag]['attack'].append((unit_id, self.main_base[1 - flag].Unit_ID))
 
@@ -738,7 +738,7 @@ class GameMain:
 
             for unit_id, unit in self.units[current_flag].items():
                 # Building Musk's skill : AI cannot move in its shot range.
-                if unit.Solider_Name == SoliderName.TURNING_MACHINE or unit.Solider_Name == SoliderName.ULTRON:
+                if unit.Soldier_Name == SoldierName.TURNING_MACHINE or unit.Soldier_Name == SoldierName.ULTRON:
                     can_move = True
                     for enemy_building in self.buildings[1 - current_flag]['defence']:
                         if (enemy_building.BuildingType == BuildingType.Musk and
@@ -751,17 +751,17 @@ class GameMain:
                     if not can_move:
                         continue
 
-                if (OriginalSoliderAttribute[unit.Solider_Name][SoliderAttr.ACTION_MODE] ==
+                if (OriginalSoldierAttribute[unit.Soldier_Name][SoldierAttr.ACTION_MODE] ==
                         ActionMode.BUILDING_ATTACK):
-                    for i in range(OriginalSoliderAttribute[unit.Solider_Name][SoliderAttr.SPEED]):
-                        # When solider is moving, if there are buildings in solider's shot range,
+                    for i in range(OriginalSoldierAttribute[unit.Soldier_Name][SoldierAttr.SPEED]):
+                        # When soldier is moving, if there are buildings in soldier's shot range,
                         # stop to attack the building, else continue moving.
                         can_move = True
                         for building_type, building_array in self.buildings[1 - current_flag].items():
                             for enemy_building in building_array:
                                 if (abs(enemy_building.Position.x - unit.Position.x) +
                                         abs(enemy_building.Position.y - unit.Position.y) <=
-                                        OriginalSoliderAttribute[unit.Solider_Name][SoliderAttr.ATTACK_RANGE]):
+                                        OriginalSoldierAttribute[unit.Soldier_Name][SoldierAttr.ATTACK_RANGE]):
                                     can_move = False
                                     break
                             if not can_move:
@@ -779,7 +779,7 @@ class GameMain:
                         (unit_id, unit.Position))
 
                 else:
-                    for i in range(OriginalSoliderAttribute[unit.Solider_Name][SoliderAttr.SPEED]):
+                    for i in range(OriginalSoldierAttribute[unit.Soldier_Name][SoldierAttr.SPEED]):
                         if _map[unit.Position.x + direction][unit.Position.y] == 1:
                             unit.Position = Position(unit.Position.x + direction, unit.Position.y)
                         elif _map[unit.Position.x][unit.Position.y + direction] == 1:
@@ -927,14 +927,14 @@ class GameMain:
             age_increase_factor = 0.5 * (self.status[current_flag]['tech'] + 2)
             for building in self.buildings[current_flag]['produce']:
                 if building.CD_left == 0:
-                    solider_name = OriginalBuildingAttribute[building.BuildingType][BuildingAttribute.TRAGET]
-                    solider_hp = OriginalSoliderAttribute[solider_name][SoliderAttr.SOLIDER_ORIGINAL_HP]
-                    solider_pos = building.ProducePos
-                    solider_flag = current_flag
-                    solider_id = self.total_id
+                    soldier_name = OriginalBuildingAttribute[building.BuildingType][BuildingAttribute.TRAGET]
+                    soldier_hp = OriginalSoldierAttribute[soldier_name][SoldierAttr.SOLDIER_ORIGINAL_HP]
+                    soldier_pos = building.ProducePos
+                    soldier_flag = current_flag
+                    soldier_id = self.total_id
                     cd = OriginalBuildingAttribute[building.BuildingType][BuildingAttribute.CD]
-                    self.units[current_flag][solider_id]=\
-                        Solider(solider_name, solider_hp, solider_pos, solider_flag, solider_id)
+                    self.units[current_flag][soldier_id]=\
+                        Soldier(soldier_name, soldier_hp, soldier_pos, soldier_flag, soldier_id)
                     building.CD_left = cd  # 重置CD
                     self.total_id += 1
                 else:
@@ -1002,10 +1002,10 @@ class GameMain:
                out.write(line)
             tech_factor = 0.5 * (self.status[flag]['tech'] + 2)
             for unit_id, unit in self.units[flag].items():
-                line = "\t\t\tID:" + str(unit_id) + " Type:" + str(int(unit.Solider_Name)) \
+                line = "\t\t\tID:" + str(unit_id) + " Type:" + str(int(unit.Soldier_Name)) \
                       + " Position:" + str(unit.Position.x) + ' ' + str(unit.Position.y) \
-                      + " Attack:" + str(OriginalSoliderAttribute[unit.Solider_Name][
-                                SoliderAttr.SOLIDER_ORIGINAL_ATTACK] * tech_factor) \
+                      + " Attack:" + str(OriginalSoldierAttribute[unit.Soldier_Name][
+                                SoldierAttr.SOLDIER_ORIGINAL_ATTACK] * tech_factor) \
                       + " HP:" + str(unit.HP) + '\n'
                 with open("debug.txt", "a") as out:
                     out.write(line)

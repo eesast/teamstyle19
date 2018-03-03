@@ -8,10 +8,10 @@ import sys
 
 from gamemain import GameMain
 import unit
-from unit import BuildingType, Building, Solider, Age, SoliderName
+from unit import BuildingType, Building, Soldier, Age, SoldierName
 
 
-# 以下为两个将building，solider转化为字典函数，便于写入文件（在通信未完成之前）
+# 以下为两个将building，soldier转化为字典函数，便于写入文件（在通信未完成之前）
 def building2dict(std):
     return {"flag": std.Flag, "type": str(std.BuildingType),
             "HP": std.HP, "Maintain": std.Is_Maintain,
@@ -19,7 +19,7 @@ def building2dict(std):
 
 
 def unit2dict(std):
-    return {"flag": std.Flag, "type": str(std.Solider_Name), "HP": std.HP,
+    return {"flag": std.Flag, "type": str(std.Soldier_Name), "HP": std.HP,
             "Pos": std.Position}
 
 
@@ -27,7 +27,7 @@ def BuildingType2Str(std):
     return str(std)
 
 
-def SoliderName2Str(std):
+def SoldierName2Str(std):
     return str(std)
 
 

@@ -43,7 +43,7 @@ def dump_data(units, buildings, status, turn_num):
                                     building.Position.x, building.Position.y, building.Is_Maintain)
     for flag in range(2):
         for unit_id, unit in units[flag].items():
-            data += struct.pack("iiiii", unit_id, unit.Solider_name, unit.HP, unit.Position.x, unit.Position.y,
+            data += struct.pack("iiiii", unit_id, unit.Soldier_name, unit.HP, unit.Position.x, unit.Position.y,
                                 )
     return data
 
