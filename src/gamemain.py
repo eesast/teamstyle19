@@ -3,6 +3,7 @@
 
 import random
 
+from json import *
 from unit import *
 
 
@@ -49,6 +50,7 @@ class GameMain:
         'upgrade': [],
         'sell': [],
         'update_age': [],
+        'produce':[],
         'resource': False
     } for _ in range(2)]
 
@@ -937,6 +939,7 @@ class GameMain:
                         Solider(solider_name, solider_hp, solider_pos, solider_flag, solider_id)
                     building.CD_left = cd  # 重置CD
                     self.total_id += 1
+                    self.instruments[current_flag]['produce'].append(solider_id)
                 else:
                     building.CD_left = building.CD_left - 1
 
@@ -1012,22 +1015,117 @@ class GameMain:
 
     def next_tick(self):
         """回合演算与指令合法性判断"""
-        if(self.turn_num < Inf):
-            self.turn_num += 1
-            '''self.attack_phase()
-            self.clean_up_phase()
-            self.move_phase()
-            self.check_legal()
-            self.building_phase()
-            self.produce_phase()
-            self.update_age_phase()
-            self.resource_phase()
-            # self.update_id()'''
-            self.judge_winner()
+        self.turn_num += 1
+        self.attack_phase()
+        self.clean_up_phase()
+        self.move_phase()
+        self.check_legal()
+        self.building_phase()
+        self.produce_phase()
+        self.update_age_phase()
+        self.resource_phase()
+        self.update_id()
+        self.judge_winnner()
 
-            self.debug_print()
-        elif (self.turn_num == Inf):
-            self.judge_winner()
+        self.turn_save()
+        self.debug_print()
+        self.instruments = [{
+            'attack': [],
+            'move': [],
+            'construct': [],
+            'maintain': [],
+            'upgrade': [],
+            'sell': [],
+            'update_age': [],
+            'produce': [],
+            'resource': False
+        } for _ in range(2)]
+
+    def map_save(self):
+        jmap=JSONEncoder().encode(self._map)
+        with open('map_save.txt','w') as f:
+            f.write(jmap)
+
+    def turn_save(self):
+        junits = [[] for _ in range(2)]
+        jbuildings = [{
+            'produce': [],
+            'defence': [],
+            'resource': []
+        } for _ in range(2)]
+        jstatus = [{
+            'money': 0,
+            'tech': 0,
+            'building': 0,
+        } for _ in range(2)]
+        jinstruments = [{
+            'attack': [],
+            'move': [],
+            'construct': [],
+            'maintain': [],
+            'upgrade': [],
+            'sell': [],
+            'update_age': [],
+            'produce': [],
+            'resource': False
+        } for _ in range(2)]
+        for i in range (2):
+            for unit_id,unit in self.units[i].items():
+                unit_temp={'name':str(unit.Solider_Name),'hp':unit.HP,'pos':(unit.Position.x,unit.Position.y),'flag':unit.Flag,'id':unit.Unit_ID}
+                junits[i].append(unit_temp)
+            for building in self.buildings[i]['produce']:
+                building_temp={'type':str(building.BuildingType),'pos':(building.Position.x,building.Position.y),'hp':building.HP,'flag':building.Flag,'id':building.Unit_ID,
+                               'maintain':building.Is_Maintain,'level':building.level,'pro_pos':(building.ProducePos.x,building.ProducePos.y)}
+                jbuildings[i]['produce'].append(building_temp)
+            for building in self.buildings[i]['defence']:
+                building_temp = {'type': str(building.BuildingType), 'pos': (building.Position.x, building.Position.y),
+                                 'hp': building.HP, 'flag': building.Flag, 'id': building.Unit_ID,
+                                 'maintain': building.Is_Maintain, 'level': building.level,
+                                 'pro_pos': (building.ProducePos.x, building.ProducePos.y)}
+                jbuildings[i]['defence'].append(building_temp)
+            for building in self.buildings[i]['resource']:
+                building_temp = {'type': str(building.BuildingType), 'pos': (building.Position.x, building.Position.y),
+                                 'hp': building.HP, 'flag': building.Flag, 'id': building.Unit_ID,
+                                 'maintain': building.Is_Maintain, 'level': building.level,
+                                 'pro_pos': (building.ProducePos.x, building.ProducePos.y)}
+                jbuildings[i]['resource'].append(building_temp)
+            jstatus[i]=self.status[i]
+            jinstruments[i]['attack']=self.instruments[i]['attack']
+            for id,pos in self.instruments[i]['move']:
+                jinstruments[i]['move'].append({'id':id,'pos':(pos.x,pos.y)})
+            for building in self.instruments[i]['construct']:
+                construct_temp = {'type':str(building[0]),'pos':(building[1][0],building[1][1])}
+                if building[0] < 9 and building[0] > 0:
+                    produce_pos = (building[2][0],building[2][1])
+                    construct_temp['pro_pos']=produce_pos
+                jinstruments[i]['construct'].append(construct_temp)
+            '''for building in self.instruments[i]['maintain']:
+                jinstruments[i]['maintain'].append((
+                    str(building.BuildingType), building.HP, (building.Position.x,building.Position.y), building.Flag, building.Unit_ID,
+                     building.Is_Maintain, building.level,(building.ProducePos.x,building.ProducePos.y)))'''
+            jinstruments[i]['maintain']=self.instruments[i]['maintain']
+            '''for building in self.instruments[i]['upgrade']:
+                jinstruments[i]['upgrade'].append((
+                    str(building.BuildingType), building.HP, (building.Position.x,building.Position.y), building.Flag, building.Unit_ID,
+                     building.Is_Maintain, building.level,(building.ProducePos.x,building.ProducePos.y)))'''
+            jinstruments[i]['upgrade']=self.instruments[i]['upgrade']
+            '''for building in self.instruments[i]['sell']:
+                jbuildings[i]['sell'].append((
+                    str(building.BuildingType), building.HP, str(building.Position.x,building.Position.y), building.Flag, building.Unit_ID,
+                     building.Is_Maintain, building.level,(building.ProducePos.x,building.ProducePos.y)))'''
+            jinstruments[i]['sell'] = self.instruments[i]['sell']
+            jinstruments[i]['produce'] = self.instruments[i]['produce']
+            jinstruments[i]['resource']=self.instruments[i]['resource']
+        #jinstruments=self.instruments
+
+        data={'unit_0':junits[0],'unit_1':junits[1],'buildings_0':jbuildings[0],'buildings_1':jbuildings[1],'status_0':jstatus[0],
+              'status_1':jstatus[1],'instruments_0':jinstruments[0],'instruments_1':jinstruments[1]}
+        jdata = JSONEncoder().encode(data)
+        with open('turn_save.txt', 'a') as f:
+            f.write(jdata)
+            f.write('\n')
+        print("b")
+
 
 
 def main():

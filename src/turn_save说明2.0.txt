@@ -1,0 +1,34 @@
+﻿#the data format for turn_save:
+
+{
+'unit_0':[
+		{'name':名称/类型,'hp':血量,'pos':位置(x,y),'flag':阵营（0/1）,'id':id},
+		……]
+'unit_1':[
+		{"信息1":" ","信息2":" ","信息3":" "……}, #同上
+		{"信息1":" ","信息2":" ","信息3":" "……},
+		……]	
+'buildings_0':[
+		{'type':名称/类型,'pos':位置(x,y),'hp':血量,'flag':阵营,'id':id,
+                               'maintain':是否维修,'level':等级,'pro_pos':出兵点位置(x,y)}
+		{"信息1":" ","信息2":" ","信息3":" "……},
+		……]	
+'buildings_1':[
+		{"信息1":" ","信息2":" ","信息3":" "……},  #同上
+		{"信息1":" ","信息2":" ","信息3":" "……},
+		……]	
+'status_0':{"money": ,"tech": ,"building": }
+'status_1':{"money": ,"tech": ,"building": }
+'instruments_0' :{
+            "attack": [],  #(攻击方id,被攻击方id) 均可能为塔或小兵
+            "move": [],    #(移动者id,移动到的位置(x,y))
+            "construct": [],  #建造的建筑(建筑(名称/类型，血量，位置(x,y)，阵营，编号，是否在维修中（1/0），等级)，出兵点位置(x,y))
+            "maintain": [],   #维修建筑的编号id
+            "upgrade": [],    #升级建筑的编号id
+            "sell": [],       #出售建筑的编号id
+            "update_age": [],  #True/False，代表是否升级科技等级
+            "produce": [],    #生产的小兵编号id
+            "resource": False  #大部分应该都是True，代表有没有生产资源
+        }
+'instruments_1':{}  #同上
+}
