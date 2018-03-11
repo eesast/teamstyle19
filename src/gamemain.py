@@ -61,10 +61,10 @@ class GameMain:
 
         # 生成基地，位置定在0,0和199,199处
         self.main_base[0] = Building(BuildingType.Base, Position(0, 0), 0, self.total_id,
-                                     False, 0 ,Position(0, 0))
+                                     False, 1 ,Position(0, 0))
         self.total_id += 1
         self.main_base[1] = Building(BuildingType.Base, Position(199, 199), 1, self.total_id,
-                                     False, 0, Position(199, 199))
+                                     False, 1, Position(199, 199))
         self.total_id += 1
         for i in range(7):
             for j in range(7):
@@ -341,8 +341,8 @@ class GameMain:
     def __init__(self):
         self.init_map_random()
 
-    def judge_winnner(self):
-        print("judge，回合：",self.turn_num);
+    def judge_winner(self):
+        #print("judge，回合：",self.turn_num);
         if self.turn_num == Inf:
 
             if self.main_base[0].HP > self.main_base[1].HP:
@@ -353,20 +353,25 @@ class GameMain:
                 self.winner = 0
             elif self.status[0]['tech'] < self.status[1]['tech']:
                 self.winner = 1
-            elif len(self.units[0]) > len(self.units[1]):
+            elif len(self.buildings[0]) > len(self.buildings[1]) :
                 self.winner = 0
-            elif len(self.units[0]) < len(self.units[1]):
+            elif len(self.buildings[0]) < len(self.buildings[1]) :
                 self.winner = 1
             elif self.status[0]['money'] > self.status[1]['money']:
                 self.winner = 0
             elif self.status[0]['money'] < self.status[1]['money']:
                 self.winner = 1
+            elif len(self.units[0]) > len(self.units[1]):
+                self.winner = 0
+            elif len(self.units[0]) < len(self.units[1]):
+                self.winner = 1
             else:
                 self.winner = 2
-        elif self.main_base[0].HP <= 0 and self.main_base[1].HP != 0:
-            self.winner = 0
-        elif self.main_base[1].HP <= 0 and self.main_base[0].HP != 0:
+
+        elif self.main_base[0].HP <= 0 and self.main_base[1].HP > 0:
             self.winner = 1
+        elif self.main_base[1].HP <= 0 and self.main_base[0].HP > 0:
+            self.winner = 0
         else:
             self.winner = 2
 
@@ -378,14 +383,22 @@ class GameMain:
                 if instrument_type == 'update_age':
                     continue
                 # 去重，并保持原来指令次序
-                del_repeat = lambda x, y: x if y in x else x + [y]
-                new_instrument_list = reduce(del_repeat, [[], ] + instrument_list)
-
+                # del_repeat = lambda x, y: x if y in x else x + [y]
+                # new_instrument_list = reduce(del_repeat, [[], ] + instrument_list)
+                new_instrument_list = instrument_list
                 if instrument_type == 'construct':
-                    for instrument in new_instrument_list.copy():
+                    for instrument in new_instrument_list:
                         building_type = instrument[0]
-                        new_construct_pos = Position(*instrument[1])
-                        new_produce_pos = Position(*instrument[2])
+
+                        new_construct_pos = Position(instrument[1][0],instrument[1][1])
+
+                        # 生产建筑必须指定正确的生产位置
+                        if building_type >0 and building_type <9:
+                            print("*******", instrument[2][0])
+                            if len(instrument) <2:
+                                new_instrument_list.remove(instrument)
+                                continue
+                            new_produce_pos = Position(instrument[2][0],instrument[2][1])
                         # 判断建造时代是否符合要求
                         if (OriginalBuildingAttribute[BuildingType(building_type)][BuildingAttribute.AGE].value >
                                 self.status[current_flag]['tech']):
@@ -396,13 +409,15 @@ class GameMain:
                                     self._map[new_construct_pos.x][new_construct_pos.y] == 2):
                             new_instrument_list.remove(instrument)
                             continue
-                        building_range = 2  # 建造范围未定，暂设为2
+                        building_range = 8  # 建造范围未定，暂设为8
                         can_build = False
                         count = 0
                         for building_list in self.buildings[current_flag].values():
                             if not building_list:
                                 count += 1
                             if count == 3:
+                                can_build = True
+                            if new_construct_pos.x - current_flag * (self._map_size -1) <= 10:
                                 can_build = True
                             for building in building_list:
                                 if (abs(building.Position.x - new_construct_pos.x) +
@@ -795,6 +810,8 @@ class GameMain:
                         age_increase_factor)
                     if building_name < 9 and building_name >0:
                         produce_pos = Position(*construct_instrument[2])
+                    else:
+                        produce_pos = None
 
                     # Ignore the instruments that spend too much.
                     if (self.status[current_flag]['money'] < money_cost and
@@ -955,80 +972,59 @@ class GameMain:
         with open("debug.txt", "a", encoding="utf8") as out:
             out.write(line)
 
+        line = "\t指令:" + str(self.raw_instruments) + '\n'
         with open("debug.txt", "a", encoding="utf8") as out:
-            out.write("输出主基地血量\n")
+            out.write(line)
+
+        with open("debug.txt", "a", encoding="utf8") as out:
+            out.write("\t输出主基地血量\n")
         for flag in range(2):
-            line = "flag:" + str(flag) + " HP:" + str(self.main_base[flag].HP) + '\n'
+            line = "\t\tflag:" + str(flag) + " HP:" + str(self.main_base[flag].HP) + '\n'
             with open("debug.txt", "a") as out:
                 out.write(line)
-        # print('输出status中的信息')
-        # for flag in range(2):
-        #     print('flag:',flag)
-        #     for sta_type, sta_of_type in self.status[flag].items():
-        #         print(sta_type, ':', sta_of_type)
-        # print('输出raw_ins中的信息')
-        # for flag in range(2):
-        #     print('flag:', flag)
-        #     for ins_type, ins_of_type in self.raw_instruments[flag].items():
-        #         print(ins_type, end=':')
-        #         if type(ins_of_type) != bool:
-        #             for ins in ins_of_type:
-        #                 print(ins, end=' ')
-        #             print()
-        #         else:
-        #             print(ins_of_type)
-        # print('输出ins中的信息')
-        # for flag in range(2):
-        #     print('flag:', flag)
-        #     for ins_type, ins_of_type in self.instruments[flag].items():
-        #         print(ins_type, end=':')
-        #         if type(ins_of_type) != bool:
-        #             for ins in ins_of_type:
-        #                 print(ins, end=' ')
-        #             print()
-        #         else:
-        #             print(ins_of_type)
+
         with open("debug.txt", "a", encoding="utf8") as out:
-            out.write('输出building中的信息\n')
+            out.write('\t输出building中的信息\n')
         for flag in range(2):
-            line = 'flag:' + str(flag) + '\n'
+            line = '\t\tflag:' + str(flag) + '\n'
             with open("debug.txt", "a") as out:
                 out.write(line)
             for building_type,buildings_of_type in self.buildings[flag].items():
                 for building in buildings_of_type:
-                    line = "ID:" + str(building.Unit_ID) + " Type:" + str(int(building.BuildingType)) \
+                    line = "\t\t\tID:" + str(building.Unit_ID) + " Type:" + str(int(building.BuildingType)) \
                           + " Position:" + str(building.Position.x) + ' ' + str(building.Position.y) \
                           + " HP:" + str(building.HP) + '\n'
                     with open("debug.txt", "a") as out:
                         out.write(line)
 
         with open("debug.txt", "a", encoding="utf8") as out:
-            out.write('输出unit中的信息\n')
+            out.write('\t输出unit中的信息\n')
         for flag in range(2):
-            line = 'flag:' + str(flag) + '\n'
+            line = '\t\tflag:' + str(flag) + '\n'
             with open("debug.txt", "a") as out:
                out.write(line)
             tech_factor = 0.5 * (self.status[flag]['tech'] + 2)
             for unit_id, unit in self.units[flag].items():
-                line = "ID:" + str(unit_id) + " Type:" + str(int(unit.Solider_Name)) \
+                line = "\t\t\tID:" + str(unit_id) + " Type:" + str(int(unit.Solider_Name)) \
                       + " Position:" + str(unit.Position.x) + ' ' + str(unit.Position.y) \
                       + " Attack:" + str(OriginalSoliderAttribute[unit.Solider_Name][
                                 SoliderAttr.SOLIDER_ORIGINAL_ATTACK] * tech_factor) \
                       + " HP:" + str(unit.HP) + '\n'
                 with open("debug.txt", "a") as out:
                     out.write(line)
+
     def next_tick(self):
         """回合演算与指令合法性判断"""
         self.turn_num += 1
         self.attack_phase()
         self.clean_up_phase()
         self.move_phase()
-        # self.check_legal()
+        self.check_legal()
         self.building_phase()
         self.produce_phase()
         self.update_age_phase()
         self.resource_phase()
-        # self.update_id()
+        self.update_id()
         self.judge_winnner()
 
         self.turn_save()
@@ -1129,6 +1125,7 @@ class GameMain:
             f.write(jdata)
             f.write('\n')
         print("b")
+
 
 
 def main():

@@ -1,1 +1,1 @@
-[{"construct": [[8, [12, 12], [7, 7]]], "maintain": [], "upgrade": [], "sell": [], "update_age":false}, {"construct": [[16,[190,190]]], "maintain": [], "upgrade": [], "sell": [], "update_age": false}]
+[{"construct": [[4, [10, 10], [7, 7]]], "maintain": [], "upgrade": [], "sell": [], "update_age":false}, {"construct": [[12,[190,190]]], "maintain": [], "upgrade": [], "sell": [], "update_age": false}]
